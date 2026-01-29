@@ -24,12 +24,17 @@ import { Camera, UploadCloud, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import toast from "react-hot-toast";
+import { useGetUserProfile } from "@/app/hooks/useUserMutations";
+import { useUploadPhoto } from "@/app/hooks/useUploadPhoto";
 
 export default function CompleteProfilePage() {
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<File | null>(null);
+  const [avatarURL, setAvatarURL] = useState<string | null>(null);
   const [nidFile, setNidFile] = useState<File | null>(null);
   const [nidPreview, setNidPreview] = useState<string | null>(null);
 
+  const getUser = useGetUserProfile();
+  const uploadPhoto = useUploadPhoto();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -42,10 +47,12 @@ export default function CompleteProfilePage() {
     bio: "",
   });
 
-  const apiURL = process.env.NEXT_PUBLIC_API_URL;
   const handleAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setAvatar(URL.createObjectURL(file));
+    if (!file) return;
+
+    setAvatar(file);
+    setAvatarURL(URL.createObjectURL(file));
   };
 
   const handleNidDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -71,38 +78,23 @@ export default function CompleteProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    try {
-      const userInfo = {
-        name: form.name,
-        address: form.address,
-        phone: form.phone,
-      };
-
-      const res = await fetch(`${apiURL}/api/seller/my-profile/${"h"}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userInfo),
+    if (avatar && nidFile) {
+      const formData = new FormData();
+      formData.append("profileImage", avatar);
+      formData.append("nidImage", nidFile);
+      const data = await uploadPhoto.mutateAsync({
+        path: "seller/upload-assets",
+        file: formData,
       });
 
-      const data = await res.json();
-      console.log(data);
-    } catch (error) {
-      console.log(error);
-      if (error) {
-        toast.error("Something went wrong!", { duration: 4000 });
+      if (data.id) {
+        // create another mutation here for call api
       }
     }
   };
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seller/my-profile`, {
-      credentials: "include",
-    })
-    .then(res => res.json())
-    .then(data => console.log(data))
+    getUser.mutate();
   }, []);
   return (
     <main className="min-h-screen grid place-items-center px-4 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-emerald-50 via-emerald-100 to-emerald-200">
@@ -119,7 +111,7 @@ export default function CompleteProfilePage() {
             {/* ---- Avatar ---- */}
             <div className="flex flex-col items-center gap-3">
               <Avatar className="h-24 w-24 ring-4 ring-emerald-100">
-                <AvatarImage src={avatar ?? ""} />
+                <AvatarImage src={avatarURL ?? ""} />
                 <AvatarFallback className="bg-emerald-100 text-emerald-700 font-semibold">
                   {form.name.slice(0, 2).toUpperCase() || "AA"}
                 </AvatarFallback>

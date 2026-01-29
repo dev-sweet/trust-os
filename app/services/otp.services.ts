@@ -2,7 +2,6 @@ import api from "../utils/axios";
 
 export const requestOTP = async (data: { uuid: string }) => {
   const res = await api.post("/api/auth/request-otp", data);
-  console.log(res);
   return res.data;
 };
 

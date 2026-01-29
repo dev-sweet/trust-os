@@ -1,6 +1,10 @@
 "use client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createUser, loginUser } from "../services/user.services";
+import {
+  createUser,
+  getUserProfile,
+  loginUser,
+} from "../services/user.services";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
@@ -35,6 +39,15 @@ export const useCreateUser = () => {
     },
     onError: (error) => {
       console.log(error);
+    },
+  });
+};
+
+export const useGetUserProfile = () => {
+  return useMutation({
+    mutationFn: getUserProfile,
+    onSuccess: (data) => {
+      console.log(data);
     },
   });
 };

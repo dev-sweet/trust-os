@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, FormEvent, useEffect, Suspense } from "react";
+import { useState, useRef, FormEvent, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,16 +13,11 @@ import {
 } from "@/components/ui/card";
 import { useRequestOTP, useVerifyOTP } from "@/app/hooks/useOtpMutation";
 import { useSearchParams } from "next/navigation";
-// interface PageProps {
-//   searchParams: { uuid?: string };
-// }
-
 export default function VerifyOtpPage() {
   const [digits, setDigits] = useState<string[]>(Array(6).fill(""));
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
   const searchParams = useSearchParams();
   const uuid = searchParams.get("uuid");
-  console.log("uuid", uuid);
   const useOTPRequest = useRequestOTP();
   const useOTPVerify = useVerifyOTP();
 
@@ -57,7 +52,7 @@ export default function VerifyOtpPage() {
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     const paste = e.clipboardData.getData("Text").trim();
-    if (!/^\d+$/.test(paste)) return; // only digits
+    if (!/^\d+$/.test(paste)) return;
 
     const pasteDigits = paste.split("").slice(0, 6);
     const newDigits = [...digits];
@@ -100,7 +95,7 @@ export default function VerifyOtpPage() {
     if (uuid) {
       useOTPRequest.mutate({ uuid });
     }
-  });
+  }, [uuid]);
 
   return (
     <div className="min-h-screen grid place-items-center px-4 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-emerald-50 via-emerald-100 to-emerald-200">
@@ -140,9 +135,9 @@ export default function VerifyOtpPage() {
 
             <Button
               type="submit"
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
             >
-              {useOTPVerify.isPaused ? "Verifying" : "Verify"}
+              {useOTPVerify.isPending ? "Verifying..." : "Verify"}
             </Button>
           </form>
         </CardContent>
@@ -153,7 +148,7 @@ export default function VerifyOtpPage() {
             <button
               type="button"
               onClick={resendOTP}
-              className="text-emerald-600 hover:underline font-medium"
+              className="text-emerald-600 hover:underline font-medium hover:text-emerald-500 cursor-pointer"
             >
               Resend OTP
             </button>

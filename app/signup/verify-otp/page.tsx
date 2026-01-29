@@ -3,7 +3,7 @@ import VerifyOtpPage from "./VerifyOTP";
 const page = () => {
   return (
     <div>
-      <Suspense>
+      <Suspense fallback={<>Loading...</>}>
         <VerifyOtpPage />
       </Suspense>
     </div>

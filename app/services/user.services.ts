@@ -10,3 +10,8 @@ export const createUser = async (data: User) => {
   const res = await api.post("/api/auth/register", data);
   return res.data;
 };
+
+export const getUserProfile = async () => {
+  const res = await api.get(`/api/seller/my-profile`);
+  return res.data;
+};
