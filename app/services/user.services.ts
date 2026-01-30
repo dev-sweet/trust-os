@@ -12,6 +12,6 @@ export const createUser = async (data: User) => {
 };
 
 export const getUserProfile = async () => {
-  const res = await api.get(`/api/seller/my-profile`);
+  const res = await api.get(`/api/user/my-profile`);
   return res.data;
 };

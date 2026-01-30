@@ -24,7 +24,7 @@ import { Camera, UploadCloud, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { useGetUserProfile } from "@/app/hooks/useUserMutations";
+import { useGetUser } from "@/app/hooks/useUserMutations";
 import { useUploadPhoto } from "@/app/hooks/useUploadPhoto";
 
 export default function CompleteProfilePage() {
@@ -33,8 +33,10 @@ export default function CompleteProfilePage() {
   const [nidFile, setNidFile] = useState<File | null>(null);
   const [nidPreview, setNidPreview] = useState<string | null>(null);
 
-  const getUser = useGetUserProfile();
+  const { data: userData, isLoading, error } = useGetUser();
+
   const uploadPhoto = useUploadPhoto();
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -78,24 +80,37 @@ export default function CompleteProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!nidFile) toast.error("NID is Require!");
     if (avatar && nidFile) {
       const formData = new FormData();
       formData.append("profileImage", avatar);
       formData.append("nidImage", nidFile);
       const data = await uploadPhoto.mutateAsync({
-        path: "seller/upload-assets",
+        path: "user/upload-assets",
         file: formData,
       });
 
-      if (data.id) {
-        // create another mutation here for call api
+      if (data.success) {
+        console.log(data);
+        console.log(form);
       }
     }
   };
-
   useEffect(() => {
-    getUser.mutate();
-  }, []);
+    const setData = async () => {
+      if (await userData?.success) {
+        setForm((prev) => {
+          return {
+            ...prev,
+            name: userData?.data.name,
+            email: userData?.data.name,
+            phone: userData?.data.name,
+          };
+        });
+      }
+    };
+    setData();
+  }, [userData]);
   return (
     <main className="min-h-screen grid place-items-center px-4 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-emerald-50 via-emerald-100 to-emerald-200">
       <Card className="w-full max-w-3xl shadow-xl">
@@ -150,9 +165,8 @@ export default function CompleteProfilePage() {
                   type="email"
                   value={form.email}
                   disabled
-                  // onChange={(e) => setForm({ ...form, email: e.target.value })}
                   placeholder="example@email.com"
-                  className="h-10"
+                  className="bg-gray-100 h-10"
                   required
                 />
               </div>
@@ -166,7 +180,7 @@ export default function CompleteProfilePage() {
                   type="tel"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  placeholder="+977 98XXXXXXXX"
+                  placeholder="+880 18XXXXXXXX"
                   className="h-10"
                 />
               </div>
@@ -184,7 +198,7 @@ export default function CompleteProfilePage() {
             </div>
 
             {/* ---- Bio ---- */}
-            <div className="grid gap-2">
+            {/* <div className="grid gap-2">
               <Label>Profile Description</Label>
               <Textarea
                 value={form.bio}
@@ -192,11 +206,10 @@ export default function CompleteProfilePage() {
                 placeholder="A short description about yourself"
                 rows={3}
               />
-            </div>
+            </div> */}
 
-            {/* ---- Date of Birth ---- */}
-            <div className="grid sm:grid-cols-2 gap-4">
-              {" "}
+            {/* ---- Date of Birth & Website ---- */}
+            {/* <div className="grid sm:grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label>Date of Birth</Label>
                 <DatePicker
@@ -216,9 +229,7 @@ export default function CompleteProfilePage() {
                   className="h-10"
                 />
               </div>
-            </div>
-
-            {/* ---- Website ---- */}
+            </div> */}
 
             {/* ---- NID Upload ---- */}
             <div className="grid gap-2">
