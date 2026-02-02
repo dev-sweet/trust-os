@@ -4,6 +4,7 @@ import {
   createUser,
   getUserProfile,
   loginUser,
+  updateUserProfile,
 } from "../services/user.services";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -47,5 +48,18 @@ export const useGetUser = () => {
   return useQuery({
     queryKey: ["users"],
     queryFn: getUserProfile,
+  });
+};
+
+export const useUpdateUser = () => {
+  const router = useRouter();
+  return useMutation({
+    mutationFn: updateUserProfile,
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success(data.message || "Profile Updated Successfull");
+        router.push(`/dashboard`);
+      }
+    },
   });
 };

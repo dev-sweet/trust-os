@@ -24,7 +24,7 @@ import { Camera, UploadCloud, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { useGetUser } from "@/app/hooks/useUserMutations";
+import { useGetUser, useUpdateUser } from "@/app/hooks/useUserMutations";
 import { useUploadPhoto } from "@/app/hooks/useUploadPhoto";
 
 export default function CompleteProfilePage() {
@@ -33,10 +33,10 @@ export default function CompleteProfilePage() {
   const [nidFile, setNidFile] = useState<File | null>(null);
   const [nidPreview, setNidPreview] = useState<string | null>(null);
 
-  const { data: userData, isLoading, error } = useGetUser();
+  const { data: userData, isLoading } = useGetUser();
 
   const uploadPhoto = useUploadPhoto();
-
+  const updateUser = useUpdateUser();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -80,7 +80,9 @@ export default function CompleteProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nidFile) toast.error("NID is Require!");
+    if (!nidFile && !avatar)
+      return toast.error("Profile Photo & NID is Require!");
+
     if (avatar && nidFile) {
       const formData = new FormData();
       formData.append("profileImage", avatar);
@@ -90,9 +92,14 @@ export default function CompleteProfilePage() {
         file: formData,
       });
 
-      if (data.success) {
-        console.log(data);
-        console.log(form);
+      if (data.id) {
+        const user = {
+          name: form.name,
+          phone: form.phone,
+          address: form.address,
+        };
+
+        updateUser.mutate(user);
       }
     }
   };
@@ -103,8 +110,8 @@ export default function CompleteProfilePage() {
           return {
             ...prev,
             name: userData?.data.name,
-            email: userData?.data.name,
-            phone: userData?.data.name,
+            email: userData?.data.email,
+            phone: userData?.data.phone,
           };
         });
       }
@@ -288,9 +295,9 @@ export default function CompleteProfilePage() {
             {/* ---- Submit ---- */}
             <Button
               type="submit"
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
             >
-              Save Profile
+              {isLoading ? "Saving..." : "Save Profile"}
             </Button>
           </form>
         </CardContent>
