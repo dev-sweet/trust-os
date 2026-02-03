@@ -8,15 +8,19 @@ import {
 } from "../services/user.services";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "../store/authStore";
 
 export const useLoginUser = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const { setUser } = useAuthStore();
+
   return useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       if (data.success) {
+        setUser(data.user);
         toast.success(data.message || "Login successful");
         if (data?.user?.isEmailVerified) {
           router.push("/dashboard");

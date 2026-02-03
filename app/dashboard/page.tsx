@@ -19,14 +19,12 @@ import WorkEventCard, { Event } from "@/components/work/WorkEventCard";
 import StatCard from "@/components/ui/StatCard";
 import EmptyState from "@/components/ui/EmptyState";
 import TrustReasons from "@/components/trust/TrustReasons";
+import { useAuthStore } from "../store/authStore";
 // import { redirect } from "next/navigation";
 
 /* -----------------------------
    STATIC MOCK DATA
 -------------------------------- */
-const user = {
-  name: "John Doe",
-};
 
 const trustSnapshot = {
   score: 82,
@@ -58,6 +56,8 @@ export default function Dashboard() {
   //   return redirect("/login");
   // }
 
+  const { user } = useAuthStore();
+  console.log(user);
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Welcome Banner */}
@@ -65,7 +65,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-emerald-100 text-sm mb-1">Welcome,</p>
-            <h1 className="text-  2xl font-bold">{user.name}</h1>
+            <h1 className="text-  2xl font-bold">{user?.name}</h1>
           </div>
 
           <div className="hidden sm:flex items-center gap-3">

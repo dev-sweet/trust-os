@@ -9,7 +9,6 @@ const api = axios.create({
 api.interceptors.response.use(
   (res) => res,
   (error) => {
-    console.log(error.response);
     const message = error.response?.data?.message || "Something went wrong!";
     toast.error(message);
     return Promise.reject(error);

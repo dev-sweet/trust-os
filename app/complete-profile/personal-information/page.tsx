@@ -34,7 +34,7 @@ export default function CompleteProfilePage() {
   const [nidPreview, setNidPreview] = useState<string | null>(null);
 
   const { data: userData, isLoading } = useGetUser();
-
+  console.log(userData);
   const uploadPhoto = useUploadPhoto();
   const updateUser = useUpdateUser();
   const [form, setForm] = useState({

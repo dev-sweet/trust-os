@@ -27,6 +27,9 @@ import { Button } from "@radix-ui/themes";
 // import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
+import { useGetUser } from "../hooks/useUserMutations";
+import Loader from "@/components/shared/Loader";
+import { useAuthStore } from "../store/authStore";
 
 const menuItem = [
   { icon: <FiHome />, label: "Home", href: "/dashboard" },
@@ -69,7 +72,8 @@ export default function DashboardLayout({
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
   const [profileOpen, setProfileOpen] = useState<boolean>(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
-
+  const { data, isLoading } = useGetUser();
+  const { setUser, setBusinesses } = useAuthStore();
   const pathname = usePathname();
   /* Close profile dropdown on outside click */
   useEffect(() => {
@@ -84,6 +88,16 @@ export default function DashboardLayout({
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  useEffect(() => {
+    if (data) {
+      console.log("user", data.data);
+    }
+  }, [data, setUser, setBusinesses]);
+
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <div className="min-h-screen flex bg-gray-50">
