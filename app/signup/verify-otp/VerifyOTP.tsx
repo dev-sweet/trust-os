@@ -95,7 +95,7 @@ export default function VerifyOtpPage() {
     if (uuid) {
       useOTPRequest.mutate({ uuid });
     }
-  }, [uuid]);
+  }, []);
 
   return (
     <div className="min-h-screen grid place-items-center px-4 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-emerald-50 via-emerald-100 to-emerald-200">

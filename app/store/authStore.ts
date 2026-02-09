@@ -1,5 +1,6 @@
+"use client";
 import { create } from "zustand";
-
+import { persist } from "zustand/middleware";
 interface Business {
   id: string;
   name: string;
@@ -24,17 +25,23 @@ interface AuthState {
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  businesses: [],
-
-  setUser: (user) => set({ user }),
-
-  setBusinesses: (businesses) => set({ businesses }),
-
-  logout: () =>
-    set({
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
       user: null,
       businesses: [],
+
+      setUser: (user) => set({ user }),
+      setBusinesses: (businesses) => set({ businesses }),
+
+      logout: () =>
+        set({
+          user: null,
+          businesses: [],
+        }),
     }),
-}));
+    {
+      name: "auth-storage",
+    },
+  ),
+);

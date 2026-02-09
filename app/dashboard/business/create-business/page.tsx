@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { useUploadPhoto } from "@/app/hooks/useUploadPhoto";
-import { useCreateBusiness } from "@/app/hooks/useBusinessMutaions";
+import { useCreateBusiness } from "@/app/hooks/useBusinessMutations";
 
 export type BusinessForm = {
   businessName: string;
@@ -34,11 +34,9 @@ export type BusinessForm = {
   businessCategoryId: string;
 };
 const businessCategory = [
-  { id: "1", category: "Retail" },
-  { id: "2", category: "Wholesale" },
-  { id: "3", category: "E-commerce" },
-  { id: "4", category: "Manufacturing" },
-  { id: "5", category: "Distributor" },
+  { id: "1", category: "E-commerce" },
+  { id: "2", category: "Manufacturing" },
+  { id: "3", category: "Distributor" },
 ];
 export default function BusinessFormPage() {
   const [form, setForm] = useState<BusinessForm>({
@@ -117,7 +115,7 @@ export default function BusinessFormPage() {
     // after completion post images
     if (data.success) {
       const uploadData = await uploadPhoto.mutateAsync({
-        path: "user/upload-assets",
+        path: "/user/upload-assets",
         file: formData,
       });
       console.log(uploadData);
@@ -184,6 +182,7 @@ export default function BusinessFormPage() {
             onChange={handleChange("businessName")}
             placeholder="ABC Corporation"
             className="h-10"
+            required
           />
         </div>
 
@@ -194,6 +193,7 @@ export default function BusinessFormPage() {
             onValueChange={(v) =>
               setForm((prev) => ({ ...prev, businessType: v }))
             }
+            required
           >
             <SelectTrigger className="w-full h-10">
               <SelectValue placeholder="Select Business Type" />
@@ -211,6 +211,7 @@ export default function BusinessFormPage() {
             onValueChange={(v) =>
               setForm((prev) => ({ ...prev, businessCategoryId: v }))
             }
+            required
           >
             <SelectTrigger className="w-full h-10">
               <SelectValue placeholder="Select Business Category" />
@@ -232,6 +233,7 @@ export default function BusinessFormPage() {
             onChange={handleChange("businessAddress")}
             placeholder="Provide your business address"
             className="h-10"
+            required
           />
         </div>
 
@@ -241,6 +243,7 @@ export default function BusinessFormPage() {
             value={form.businessPhone}
             onChange={handleChange("businessPhone")}
             className="h-10"
+            required
           />
         </div>
 
@@ -251,6 +254,7 @@ export default function BusinessFormPage() {
             value={form.businessEmail}
             onChange={handleChange("businessEmail")}
             className="h-10"
+            required
           />
         </div>
 
@@ -260,6 +264,7 @@ export default function BusinessFormPage() {
             value={form.businessWebsite}
             onChange={handleChange("businessWebsite")}
             className="h-10"
+            required
           />
         </div>
 
@@ -269,6 +274,7 @@ export default function BusinessFormPage() {
             value={form.businessWareHouse}
             onChange={handleChange("businessWareHouse")}
             className="h-10"
+            required
           />
         </div>
 
@@ -278,6 +284,7 @@ export default function BusinessFormPage() {
             value={form.businessStoreFrontLink}
             onChange={handleChange("businessStoreFrontLink")}
             className="h-10"
+            required
           />
         </div>
       </div>

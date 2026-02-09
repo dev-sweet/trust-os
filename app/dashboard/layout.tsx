@@ -22,15 +22,32 @@ import {
   IoMdClose,
   IoMdNotificationsOutline,
 } from "react-icons/io";
-import { Globe, LogOut, Search, User } from "lucide-react";
+import {
+  Globe,
+  LogOut,
+  Search,
+  ChevronDown,
+  User,
+  Building2,
+} from "lucide-react";
 import { Button } from "@radix-ui/themes";
 // import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useGetUser } from "../hooks/useUserMutations";
 import Loader from "@/components/shared/Loader";
 import { useAuthStore } from "../store/authStore";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
+// menu items
 const menuItem = [
   { icon: <FiHome />, label: "Home", href: "/dashboard" },
   {
@@ -70,11 +87,15 @@ export default function DashboardLayout({
   /* ================= STATE ================= */
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
+
   const [profileOpen, setProfileOpen] = useState<boolean>(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
+
   const { data, isLoading } = useGetUser();
-  const { setUser, setBusinesses } = useAuthStore();
+  const { user, setUser, setBusinesses } = useAuthStore();
+
   const pathname = usePathname();
+  const router = useRouter();
   /* Close profile dropdown on outside click */
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -90,10 +111,15 @@ export default function DashboardLayout({
   }, []);
 
   useEffect(() => {
-    if (data) {
-      console.log("user", data.data);
+    if (!data && !isLoading) {
+      return router.push("/login");
     }
-  }, [data, setUser, setBusinesses]);
+    if (data) {
+      // console.log("data", data);
+      setUser(data.data);
+      // setBusinesses(data.businesses);
+    }
+  }, [data, isLoading]);
 
   if (isLoading) {
     return <Loader />;
@@ -103,11 +129,11 @@ export default function DashboardLayout({
     <div className="min-h-screen flex bg-gray-50">
       {/* ================= DESKTOP SIDEBAR ================= */}
       <aside
-        className={`hidden lg:flex flex-col bg-white border-r border-gray-100/60 transition-all duration-300 ${
+        className={`fixed top-0 h-screen overlfow-x-auto hidden lg:flex flex-col bg-white border-r border-gray-100/60 transition-all duration-300 ${
           collapsed ? "w-17.5" : "w-65"
         }`}
       >
-        <div className="fixed top-0">
+        <div className="">
           {/* Logo */}
           <div className="p-4 flex items-center justify-between  border-b border-slate-100">
             {!collapsed && (
@@ -127,37 +153,80 @@ export default function DashboardLayout({
             </button>
           </div>
           {/* User */}
-          <div className=" px-4 py-4 border-b border-slate-100">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                {/* <Image
-                  src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04"
-                  alt=""
-                  className="w-full h-full rounded-full object-cover"
-                /> */}
-
-                <User className="h-5 w-5 text-emerald-600" />
-              </div>
-              <div
-                className={`flex-1 min-w-0 transition-all duration-300 whitespace-nowrap ${
-                  collapsed
-                    ? "opacity-0 -translate-x-5 w-0 overflow-hidden"
-                    : "opacity-100 translate-x-0"
-                }`}
-                // className=""
+          <div className="px-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className={cn(
+                  "flex items-center justify-between bg-white py-2 outline-none",
+                  !collapsed && "px-2  border border-gray-300",
+                )}
               >
-                <p className="text-sm font-medium text-slate-900 truncate">
-                  User
-                </p>
-                <p className="text-xs text-slate-500 truncate">
-                  example_user@gmail.com
-                </p>
-              </div>
-            </div>
+                <div className="flex items-center justify-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <User className="h-5 w-5 text-emerald-600" />
+                  </div>
+                  <div
+                    className={`flex-1 min-w-0 transition-all duration-300 whitespace-nowrap text-start ${
+                      collapsed
+                        ? "opacity-0 -translate-x-5 w-0 overflow-hidden"
+                        : "opacity-100 translate-x-0"
+                    }`}
+                  >
+                    <p className="text-sm font-medium text-slate-900 truncate">
+                      {user?.name}
+                    </p>
+                    <p className="text-xs text-slate-500 truncate">
+                      {user?.email}
+                    </p>
+                  </div>
+                </div>
+                <ChevronDown className="h-4 w-4" />
+              </DropdownMenuTrigger>
+
+              {/* The Content */}
+              <DropdownMenuContent className="bg-white w-full rounded-none px-7 shadow-xl border-0">
+                <div className="py-2">
+                  <DropdownMenuLabel className="px-4 py-1 text-lg font-bold">
+                    Choose Account
+                  </DropdownMenuLabel>
+
+                  <DropdownMenuItem className="flex cursor-pointer items-center justify-between px-4 py-3 focus:bg-slate-100">
+                    <div className="flex items-center gap-2">
+                      <User className="h-5 w-5" />
+                      <span className="text-md">Personal</span>
+                    </div>
+                    <span className="rounded-full bg-black px-3 py-0.5 text-xs text-white">
+                      Active
+                    </span>
+                  </DropdownMenuItem>
+                </div>
+
+                <DropdownMenuSeparator className="bg-gray-200" />
+
+                <div className="py-2">
+                  <DropdownMenuLabel className="px-4 py-1 text-lg font-bold">
+                    Businesses
+                  </DropdownMenuLabel>
+
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem className="flex cursor-pointer items-center gap-2 px-4 py-3 focus:bg-slate-100 text-md">
+                      <Building2 className="h-5 w-5" />
+                      <span>Rahim Traders</span>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem className="flex cursor-pointer items-center gap-2 px-4 py-3 focus:bg-slate-100 text-md">
+                      <Building2 className="h-5 w-5" />
+                      <span>Bangla Services</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
+
         {/* Menu */}
-        <nav className="overflow-y-auto mt-40 flex flex-col gap-2 px-4">
+        <nav className="overflow-y-auto mt-3 flex flex-col gap-2 px-4">
           {menuItem.map((item) => (
             <Link
               key={item.label}
@@ -183,7 +252,7 @@ export default function DashboardLayout({
           ))}
         </nav>
         {/* Logout */}
-        <div className="fixed left-0 bottom-0 mt-2 px-4 pb-2 border-t border-slate-100">
+        <div className="left-0 bottom-0 mt-2 px-4 pb-2 border-t border-slate-100">
           <Button
             variant="ghost"
             className=" p-2 flex items-center w-full justify-start gap-3 text-slate-600 hover:text-red-600 hover:bg-red-50 cursor-pointer"
@@ -203,7 +272,12 @@ export default function DashboardLayout({
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col fix top-0 left-0 right-0">
+      <div
+        className={cn(
+          "flex-1 flex flex-col fix top-0 left-0 right-0",
+          collapsed ? "lg:pl-17.5" : "lg:pl-65",
+        )}
+      >
         {/* ================= HEADER ================= */}
         <header className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100/60">
           <div className="flex items-center gap-3 flex-1">

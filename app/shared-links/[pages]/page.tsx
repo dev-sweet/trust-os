@@ -2,8 +2,6 @@
 
 import React, { useState } from "react";
 import {
-  ThumbsUp,
-  ThumbsDown,
   X,
   UploadCloud,
   MessageSquare,
@@ -27,40 +25,45 @@ type ReviewType =
 export default function ReviewPage() {
   const [selected, setSelected] = useState<ReviewType | null>(null);
   const [complaint, setComplaint] = useState("");
-  const [nidFile, setNidFile] = useState<File | null>(null);
-  const [nidPreview, setNidPreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const formData = new FormData();
 
-    console.log({
-      selected,
-      complaint,
-      //   image,
-    });
+    formData.append("review", selected as string);
+    formData.append("complain", complaint as string);
+    formData.append("attachment", imageFile as File);
+    // console.log({
+    //   selected,
+    //   complaint,
+    //   imageFile,
+    // });
 
+    console.log("formData", formData);
     alert("Review Submitted!");
   };
 
-  const handleNidDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleImageDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith("image/")) setNid(file);
+    if (file && file.type.startsWith("image/")) setImage(file);
   };
 
-  const handleNidSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setNid(file);
+    if (file) setImage(file);
   };
 
-  const setNid = (file: File) => {
-    setNidFile(file);
-    setNidPreview(URL.createObjectURL(file));
+  const setImage = (file: File) => {
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
-  const removeNid = () => {
-    setNidFile(null);
-    setNidPreview(null);
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
   };
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-8">
@@ -119,7 +122,7 @@ export default function ReviewPage() {
           <>
             <div className="space-y-2">
               <Label className="font-medium flex items-center gap-2">
-                <MessageSquare /> Complaint
+                <MessageSquare /> Describe Your Issue
               </Label>
 
               <Textarea
@@ -130,32 +133,35 @@ export default function ReviewPage() {
               />
             </div>
 
-            <Label htmlFor="nid-upload" className="grid gap-2  cursor-pointer">
+            <Label
+              htmlFor="image-upload"
+              className="grid gap-2  cursor-pointer"
+            >
               <label className="font-medium flex items-center gap-2">
                 <ImageIcon /> Upload Image
               </label>
               <div
-                onDrop={handleNidDrop}
+                onDrop={handleImageDrop}
                 onDragOver={(e) => e.preventDefault()}
                 className={cn(
                   "rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50/50 p-6 text-center transition",
                   "hover:border-emerald-400 hover:bg-emerald-100/60",
                 )}
               >
-                {nidPreview ? (
+                {imagePreview ? (
                   <div className="relative inline-block">
                     <Image
-                      src={nidPreview}
+                      src={imagePreview}
                       height={40}
                       width={120}
-                      alt="nid"
+                      alt="image"
                       className="h-40 rounded-lg shadow"
                     />
                     <Button
                       type="button"
                       size="icon"
                       variant="ghost"
-                      onClick={removeNid}
+                      onClick={removeImage}
                       className="absolute -top-2 -right-2 rounded-full bg-white/80 hover:bg-white"
                     >
                       <X className="h-4 w-4 text-emerald-700" />
@@ -171,11 +177,11 @@ export default function ReviewPage() {
                       PNG, JPG, JPEG or GIF
                     </Label>
                     <Input
-                      id="nid-upload"
+                      id="image-upload"
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      onChange={handleNidSelect}
+                      onChange={handleImageSelect}
                     />
                   </>
                 )}

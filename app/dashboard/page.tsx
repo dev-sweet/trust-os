@@ -20,7 +20,6 @@ import StatCard from "@/components/ui/StatCard";
 import EmptyState from "@/components/ui/EmptyState";
 import TrustReasons from "@/components/trust/TrustReasons";
 import { useAuthStore } from "../store/authStore";
-// import { redirect } from "next/navigation";
 
 /* -----------------------------
    STATIC MOCK DATA
@@ -52,10 +51,6 @@ const disputes = [{ id: 1 }];
 // const cookieStore = cookies();
 // const token = localStorage.getItem("token");
 export default function Dashboard() {
-  // if (!token) {
-  //   return redirect("/login");
-  // }
-
   const { user } = useAuthStore();
   console.log(user);
   return (
@@ -74,7 +69,7 @@ export default function Dashboard() {
               className="bg-white/20 hover:bg-white/30 text-white border-0"
               asChild
             >
-              <Link href="/share">
+              <Link href="/dashboard/share">
                 <Share2 className="h-4 w-4 mr-2" />
                 Share Profile
               </Link>
@@ -84,7 +79,7 @@ export default function Dashboard() {
               className="bg-white text-emerald-700 hover:bg-emerald-50"
               asChild
             >
-              <Link href="/work-events/add">
+              <Link href="/dashboard/create-order">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Work Event
               </Link>
@@ -96,13 +91,13 @@ export default function Dashboard() {
       {/* Mobile Actions */}
       <div className="sm:hidden grid grid-cols-2 gap-3">
         <Button asChild>
-          <Link href="/work-events/add">
+          <Link href="create-order">
             <Plus className="h-4 w-4 mr-2" />
             Add Work Event
           </Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link href="/share">
+          <Link href="/dashboard/share">
             <Share2 className="h-4 w-4 mr-2" />
             Share Profile
           </Link>

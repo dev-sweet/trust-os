@@ -16,12 +16,65 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { UploadCloud, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { useUploadPhoto } from "../../hooks/useUploadPhoto";
+import { useCreateOrder } from "../../hooks/useOrderMutations";
+import toast from "react-hot-toast";
 
+// for dialog
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+import {
+  Check,
+  Copy,
+  Link2,
+  MessageCircle,
+  Mail,
+  Twitter,
+  Send,
+  MoreHorizontal,
+  ShieldCheck,
+} from "lucide-react";
+
+// types
+
+export interface OrderForm {
+  orderDate: string;
+  productName: string;
+  productDescription: string;
+  productPrice: string;
+  productQuantity: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  customerAddress: string;
+  invoiceNumber: string;
+  invoiceUrl: string;
+  profOfDelivery: string;
+  deliveryDate: Date | null | string;
+}
 export default function CompleteProfilePage() {
+  // files
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [proofPreview, setProofPreview] = useState<string | null>(null);
+  const [invoice, setInvoice] = useState<File | null>(null);
 
-  const [form, setForm] = useState({
+  // modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [shareableLink, setShareableLink] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  // form
+  const [form, setForm] = useState<OrderForm>({
+    orderDate: new Date().toISOString(),
     productName: "",
     productDescription: "",
     productPrice: "",
@@ -31,9 +84,15 @@ export default function CompleteProfilePage() {
     customerPhone: "",
     customerAddress: "",
     invoiceNumber: "",
-    deliveryDate: undefined as Date | undefined,
+    invoiceUrl: "",
+    profOfDelivery: "",
+    deliveryDate: null,
   });
 
+  // const { mutate, isPending } = useUploadPhoto();
+  const createOrder = useCreateOrder();
+
+  // handle drag & drop and file input
   const handleproofDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
@@ -55,6 +114,14 @@ export default function CompleteProfilePage() {
     setProofPreview(null);
   };
 
+  // handle image of invoice
+  const handleInvoiceChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const invoiceFile = event.target.files?.[0];
+    setInvoice(invoiceFile as File);
+    console.log(invoiceFile);
+  };
+
+  // on form element change event
   const handleChange = (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -63,12 +130,81 @@ export default function CompleteProfilePage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // on form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("proof", proofFile);
-    console.log("proof", proofFile);
+    const result = await createOrder.mutateAsync({
+      ...form,
+      deliveryDate:
+        form.deliveryDate instanceof Date
+          ? form.deliveryDate.toISOString()
+          : (form.deliveryDate ?? null),
+    });
+
+    console.log(result);
+    // setIsModalOpen(true);
+    // setShareableLink(
+    //   `http://localhost:3000/shared-links/${result.data.link.link}`,
+    // );
   };
 
+  // Copy link to clipboard
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(shareableLink);
+      setCopied(true);
+      toast.success("Link copied to clipboard!");
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Failed to copy link");
+    }
+  };
+
+  // Share via social links
+  const encodedLink = encodeURIComponent(shareableLink);
+  const encodedTitle = encodeURIComponent("Check out this link!");
+
+  const shareOptions = [
+    {
+      name: "WhatsApp",
+      icon: MessageCircle,
+      color: "bg-emerald-600 hover:bg-emerald-500",
+      url: `https://wa.me/?text=${encodedTitle}%20${encodedLink}`,
+    },
+
+    {
+      name: "Twitter",
+      icon: Twitter,
+      color: "bg-sky-500 hover:bg-sky-400",
+      url: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedLink}`,
+    },
+    {
+      name: "Email",
+      icon: Mail,
+      color: "bg-gray-700 hover:bg-gray-600",
+      url: `mailto:?subject=${encodedTitle}&body=${encodedLink}`,
+    },
+  ];
+
+  const handleShare = (option: (typeof shareOptions)[0]) => {
+    window.open(option.url, "_blank", "noopener,noreferrer");
+  };
+
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Check out this link!",
+          url: shareableLink,
+        });
+      } catch (err) {
+        if ((err as Error).name !== "AbortError")
+          toast.error("Failed to share");
+      }
+    } else {
+      toast.error("Native sharing not supported on this device");
+    }
+  };
   return (
     <main className="min-h-screen grid place-items-center px-4 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-emerald-50 via-emerald-100 to-emerald-200">
       <Card className="w-full max-w-3xl shadow-xl">
@@ -193,7 +329,7 @@ export default function CompleteProfilePage() {
                 <Input
                   type="file"
                   accept="image/*"
-                  // onChange={handleImageChange}
+                  onChange={handleInvoiceChange}
                   required
                   className="file:border file:bg-emerald-600 file:text-white px-0 file:cursor-pointer cursor-pointer file:px-4 file:py-2 h-10 py-0  file:rounded-md"
                 />
@@ -209,8 +345,8 @@ export default function CompleteProfilePage() {
               <div className="grid gap-2">
                 <Label>Delivery Date</Label>
                 <DatePicker
-                  date={form.deliveryDate}
-                  setDate={(d) => setForm({ ...form, deliveryDate: d })}
+                  date={form.deliveryDate as Date}
+                  setDate={(d) => setForm({ ...form, deliveryDate: d as Date })}
                 />
               </div>
             </div>
@@ -279,6 +415,85 @@ export default function CompleteProfilePage() {
           </form>
         </CardContent>
       </Card>
+      <Dialog
+        // style={{ overflow: "hidden" }}
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+      >
+        <DialogContent className="max-w-sm w-full overflow-y-auto overflow-x-hidden">
+          <DialogHeader>
+            <DialogTitle>
+              <div className="flex justify-center">
+                {/* <div className="relative">
+                <div className="w-20 h-20 rounded-full bg-linear-to-tr from-emerald-500 to-emerald-700 flex items-center justify-center">
+                  <ShieldCheck
+                    className="w-10 h-10 text-white"
+                    strokeWidth={3}
+                  />
+                </div>
+                <div className="absolute inset-0 w-20 h-20 rounded-full bg-emerald-500/20 animate-ping" />
+              </div> */}
+                <ShieldCheck size="100" className="text-emerald-700" />
+              </div>{" "}
+            </DialogTitle>
+            <DialogDescription></DialogDescription>
+          </DialogHeader>
+
+          <div className="w-full min-w-0 overflow-hidden">
+            <h1 className="text-2xl font-bold text-center text-gray-800 mb-2">
+              Your link is ready!
+            </h1>
+
+            <p className="text-center text-emerald-500 mb-4">
+              Share this link with anyone you like
+            </p>
+            <div className="text-center">
+              <div className="flex justify-center gap-3 flex-wrap">
+                {shareOptions.map((option) => (
+                  <Button
+                    key={option.name}
+                    onClick={() => handleShare(option)}
+                    className={`w-14 h-14 rounded-2xl p-0 ${option.color} text-white shadow-md transition-all hover:scale-105 hover:shadow-lg`}
+                    title={`Share via ${option.name}`}
+                  >
+                    <option.icon className="w-6 h-6" />
+                  </Button>
+                ))}
+
+                <Button
+                  onClick={handleNativeShare}
+                  className="w-14 h-14 rounded-2xl p-0 bg-emerald-200 text-emerald-800 shadow-md transition-all hover:scale-105 hover:shadow-lg"
+                  title="More options"
+                >
+                  <MoreHorizontal className="w-6 h-6" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Copy Button */}
+            <Button
+              onClick={handleCopy}
+              className="mt-10 w-full h-12 bg-linear-to-r from-emerald-600 to-emerald-700 text-white font-medium rounded-xl shadow-lg hover:opacity-90 transition-opacity mb-8"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-5 h-5 mr-2" /> Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="w-5 h-5 mr-2" /> Copy Link
+                </>
+              )}
+            </Button>
+          </div>
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Close</Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
