@@ -79,6 +79,7 @@ const menuItem = [
     href: "/dashboard/user-settings",
   },
 ];
+
 export default function DashboardLayout({
   children,
 }: {
@@ -96,6 +97,7 @@ export default function DashboardLayout({
 
   const pathname = usePathname();
   const router = useRouter();
+
   /* Close profile dropdown on outside click */
   useEffect(() => {
     const handler = (e: MouseEvent) => {
