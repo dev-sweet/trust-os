@@ -61,14 +61,14 @@ export interface OrderForm {
   profOfDelivery: string;
   deliveryDate: Date | null | string;
 }
-export default function CompleteProfilePage() {
+export default function CreateOrder() {
   // files
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [proofPreview, setProofPreview] = useState<string | null>(null);
   const [invoice, setInvoice] = useState<File | null>(null);
 
   // modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(true);
   const [shareableLink, setShareableLink] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -89,7 +89,7 @@ export default function CompleteProfilePage() {
     deliveryDate: null,
   });
 
-  // const { mutate, isPending } = useUploadPhoto();
+  const uploadPhoto = useUploadPhoto();
   const createOrder = useCreateOrder();
 
   // handle drag & drop and file input
@@ -141,11 +141,23 @@ export default function CompleteProfilePage() {
           : (form.deliveryDate ?? null),
     });
 
-    console.log(result);
-    // setIsModalOpen(true);
-    // setShareableLink(
-    //   `http://localhost:3000/shared-links/${result.data.link.link}`,
-    // );
+    if (result.success) {
+      const formData = new FormData();
+      formData.append("invoiceFiles", invoice as File);
+      formData.append("profOfDeliveryFiles", proofFile as File);
+
+      const data = await uploadPhoto.mutateAsync({
+        path: `user/upload-assets?orderId=${result?.data?.order?.id}`,
+        file: formData,
+      });
+
+      if (data) {
+        setIsModalOpen(true);
+        setShareableLink(
+          `http://localhost:300/shared-links/${result.data.link.link}`,
+        );
+      }
+    }
   };
 
   // Copy link to clipboard
@@ -171,15 +183,8 @@ export default function CompleteProfilePage() {
       color: "bg-emerald-600 hover:bg-emerald-500",
       url: `https://wa.me/?text=${encodedTitle}%20${encodedLink}`,
     },
-
     {
-      name: "Twitter",
-      icon: Twitter,
-      color: "bg-sky-500 hover:bg-sky-400",
-      url: `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedLink}`,
-    },
-    {
-      name: "Email",
+      name: "SMS",
       icon: Mail,
       color: "bg-gray-700 hover:bg-gray-600",
       url: `mailto:?subject=${encodedTitle}&body=${encodedLink}`,
@@ -190,21 +195,6 @@ export default function CompleteProfilePage() {
     window.open(option.url, "_blank", "noopener,noreferrer");
   };
 
-  const handleNativeShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "Check out this link!",
-          url: shareableLink,
-        });
-      } catch (err) {
-        if ((err as Error).name !== "AbortError")
-          toast.error("Failed to share");
-      }
-    } else {
-      toast.error("Native sharing not supported on this device");
-    }
-  };
   return (
     <main className="min-h-screen grid place-items-center px-4 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-emerald-50 via-emerald-100 to-emerald-200">
       <Card className="w-full max-w-3xl shadow-xl">
@@ -333,14 +323,6 @@ export default function CompleteProfilePage() {
                   required
                   className="file:border file:bg-emerald-600 file:text-white px-0 file:cursor-pointer cursor-pointer file:px-4 file:py-2 h-10 py-0  file:rounded-md"
                 />
-
-                {/* {false && (
-                  <img
-                    src={preview}
-                    alt="Preview"
-                    className="h-32 w-32 object-cover rounded-md border"
-                  />
-                )} */}
               </div>
               <div className="grid gap-2">
                 <Label>Delivery Date</Label>
@@ -420,19 +402,10 @@ export default function CompleteProfilePage() {
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
       >
-        <DialogContent className="max-w-sm w-full overflow-y-auto overflow-x-hidden">
+        <DialogContent className="md:w-84 w-sm overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>
               <div className="flex justify-center">
-                {/* <div className="relative">
-                <div className="w-20 h-20 rounded-full bg-linear-to-tr from-emerald-500 to-emerald-700 flex items-center justify-center">
-                  <ShieldCheck
-                    className="w-10 h-10 text-white"
-                    strokeWidth={3}
-                  />
-                </div>
-                <div className="absolute inset-0 w-20 h-20 rounded-full bg-emerald-500/20 animate-ping" />
-              </div> */}
                 <ShieldCheck size="100" className="text-emerald-700" />
               </div>{" "}
             </DialogTitle>
@@ -459,32 +432,26 @@ export default function CompleteProfilePage() {
                     <option.icon className="w-6 h-6" />
                   </Button>
                 ))}
-
-                <Button
-                  onClick={handleNativeShare}
-                  className="w-14 h-14 rounded-2xl p-0 bg-emerald-200 text-emerald-800 shadow-md transition-all hover:scale-105 hover:shadow-lg"
-                  title="More options"
-                >
-                  <MoreHorizontal className="w-6 h-6" />
-                </Button>
               </div>
             </div>
 
             {/* Copy Button */}
-            <Button
-              onClick={handleCopy}
-              className="mt-10 w-full h-12 bg-linear-to-r from-emerald-600 to-emerald-700 text-white font-medium rounded-xl shadow-lg hover:opacity-90 transition-opacity mb-8"
-            >
-              {copied ? (
-                <>
-                  <Check className="w-5 h-5 mr-2" /> Copied!
-                </>
-              ) : (
-                <>
-                  <Copy className="w-5 h-5 mr-2" /> Copy Link
-                </>
-              )}
-            </Button>
+            <div className="text-center">
+              <Button
+                onClick={handleCopy}
+                className="mt-8 w-28 h-10 bg-linear-to-r text-xs from-emerald-600 to-emerald-700 text-white font-medium rounded-lg shadow-lg hover:opacity-90 transition-opacity mb-8"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-5 h-5" /> Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-5 h-5" /> Copy Link
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
 
           <DialogFooter>
