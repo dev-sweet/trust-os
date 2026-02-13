@@ -34,9 +34,9 @@ import { Button } from "@radix-ui/themes";
 // import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
-import { useGetUser } from "../hooks/useUserMutations";
+import { useGetUser } from "@/hooks/useUserMutations";
 import Loader from "@/components/shared/Loader";
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "@/store/authStore";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -113,17 +113,14 @@ export default function DashboardLayout({
   }, []);
 
   useEffect(() => {
-    if (!data && !isLoading) {
-      return router.push("/login");
-    }
     if (data) {
-      // console.log("data", data);
+      // console.log("data", data.data);
       setUser(data.data);
       // setBusinesses(data.businesses);
     }
-  }, [data, isLoading]);
+  }, [data, setUser]);
 
-  if (isLoading) {
+  if (isLoading || (!data && !isLoading)) {
     return <Loader />;
   }
 

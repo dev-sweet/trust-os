@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import toast from "react-hot-toast";
-import { useCreateUser } from "../hooks/useUserMutations";
+import { useCreateUser } from "@/hooks/useUserMutations";
 
 // types
 export interface User {

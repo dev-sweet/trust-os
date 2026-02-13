@@ -19,7 +19,7 @@ import WorkEventCard, { Event } from "@/components/work/WorkEventCard";
 import StatCard from "@/components/ui/StatCard";
 import EmptyState from "@/components/ui/EmptyState";
 import TrustReasons from "@/components/trust/TrustReasons";
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "@/store/authStore";
 
 /* -----------------------------
    STATIC MOCK DATA

@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useLoginUser } from "../hooks/useUserMutations";
+import { useLoginUser } from "@/hooks/useUserMutations";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });

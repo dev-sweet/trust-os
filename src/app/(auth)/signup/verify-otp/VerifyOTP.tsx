@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useRequestOTP, useVerifyOTP } from "@/app/hooks/useOtpMutation";
+import { useRequestOTP, useVerifyOTP } from "@/hooks/useOtpMutation";
 import { useSearchParams } from "next/navigation";
 export default function VerifyOtpPage() {
   const [digits, setDigits] = useState<string[]>(Array(6).fill(""));

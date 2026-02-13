@@ -16,8 +16,8 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { UploadCloud, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { useUploadPhoto } from "../../hooks/useUploadPhoto";
-import { useCreateOrder } from "../../hooks/useOrderMutations";
+import { useUploadPhoto } from "@/hooks/useUploadPhoto";
+import { useCreateOrder } from "@/hooks/useOrderMutations";
 import toast from "react-hot-toast";
 
 // for dialog
@@ -68,7 +68,7 @@ export default function CreateOrder() {
   const [invoice, setInvoice] = useState<File | null>(null);
 
   // modal state
-  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [shareableLink, setShareableLink] = useState("");
   const [copied, setCopied] = useState(false);
 

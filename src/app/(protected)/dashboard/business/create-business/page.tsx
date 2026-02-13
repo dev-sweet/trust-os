@@ -18,8 +18,8 @@ import {
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { useUploadPhoto } from "@/app/hooks/useUploadPhoto";
-import { useCreateBusiness } from "@/app/hooks/useBusinessMutations";
+import { useUploadPhoto } from "@/hooks/useUploadPhoto";
+import { useCreateBusiness } from "@/hooks/useBusinessMutations";
 
 export type BusinessForm = {
   businessName: string;
@@ -101,24 +101,23 @@ export default function BusinessFormPage() {
       return toast.error("Trade License is required!");
     }
 
-    const formData = new FormData();
-    if (tradeLicenseFile) {
-      formData.append("businessTradeLicense", tradeLicenseFile);
-    }
-    if (logoFile) {
-      formData.append("businessLogo", logoFile);
-    }
-
     // call post api for create business
     const data = await createBusiness.mutateAsync(form);
 
     // after completion post images
     if (data.success) {
+      const formData = new FormData();
+      if (tradeLicenseFile) {
+        formData.append("businessTradeLicense", tradeLicenseFile);
+      }
+      if (logoFile) {
+        formData.append("businessLogo", logoFile);
+      }
       const uploadData = await uploadPhoto.mutateAsync({
-        path: "/user/upload-assets",
+        path: `user/upload-assets?businessId=${data.id}`,
         file: formData,
       });
-      console.log(uploadData);
+
       if (uploadData.id) {
         toast.success("Business Profile Created!");
       }

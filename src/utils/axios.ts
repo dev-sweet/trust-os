@@ -9,8 +9,19 @@ const api = axios.create({
 api.interceptors.response.use(
   (res) => res,
   (error) => {
+    if (error.response.status === 401) {
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
+      return Promise.reject(error);
+    }
+
     const message = error.response?.data?.message || "Something went wrong!";
-    toast.error(message);
+    // console.log(message);
+    // if (typeof window !== "undefined") {
+    //   toast.error(message);
+    // }
+    // toast.error(message);
     return Promise.reject(error);
   },
 );
