@@ -29,12 +29,13 @@ import {
   ChevronDown,
   User,
   Building2,
+  Plus,
 } from "lucide-react";
 import { Button } from "@radix-ui/themes";
 // import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
-import { useGetUser } from "@/hooks/useUserMutations";
+import { useCheckUser } from "@/hooks/useUserMutations";
 import Loader from "@/components/shared/Loader";
 import { useAuthStore } from "@/store/authStore";
 import {
@@ -46,6 +47,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useActiveAccount } from "@/store/accoutStore";
 
 // menu items
 const menuItem = [
@@ -92,11 +94,19 @@ export default function DashboardLayout({
   const [profileOpen, setProfileOpen] = useState<boolean>(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
 
-  const { data, isLoading } = useGetUser();
-  const { user, setUser, setBusinesses } = useAuthStore();
+  const { data, isLoading } = useCheckUser();
+  const { user, businesses, setUser, setBusinesses } = useAuthStore();
 
   const pathname = usePathname();
   const router = useRouter();
+
+  const switchToBusiness = useActiveAccount((state) => state.switchToBusiness);
+
+  const switchToPersonal = useActiveAccount((state) => state.switchToPersonal);
+  const activeAccount = useActiveAccount();
+  const activeBusiness = businesses.filter(
+    (business) => business.id === activeAccount.id,
+  );
 
   /* Close profile dropdown on outside click */
   useEffect(() => {
@@ -113,12 +123,11 @@ export default function DashboardLayout({
   }, []);
 
   useEffect(() => {
-    if (data) {
-      // console.log("data", data.data);
-      setUser(data.data);
-      // setBusinesses(data.businesses);
+    if (data?.loggedIn) {
+      setUser(data.user);
+      setBusinesses(data.businessInfo);
     }
-  }, [data, setUser]);
+  }, [data, businesses, setUser, setBusinesses]);
 
   if (isLoading || (!data && !isLoading)) {
     return <Loader />;
@@ -156,28 +165,50 @@ export default function DashboardLayout({
             <DropdownMenu>
               <DropdownMenuTrigger
                 className={cn(
-                  "flex items-center justify-between bg-white py-2 outline-none",
+                  "w-full flex items-center justify-between bg-white py-2 outline-none",
                   !collapsed && "px-2  border border-gray-300",
                 )}
               >
                 <div className="flex items-center justify-start gap-3">
                   <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <User className="h-5 w-5 text-emerald-600" />
+                    {activeAccount.accountType === "personal" ? (
+                      <User className="h-5 w-5 text-emerald-600" />
+                    ) : (
+                      <Building2 className="h-5 w-5 text-emerald-600" />
+                    )}
                   </div>
-                  <div
-                    className={`flex-1 min-w-0 transition-all duration-300 whitespace-nowrap text-start ${
-                      collapsed
-                        ? "opacity-0 -translate-x-5 w-0 overflow-hidden"
-                        : "opacity-100 translate-x-0"
-                    }`}
-                  >
-                    <p className="text-sm font-medium text-slate-900 truncate">
-                      {user?.name}
-                    </p>
-                    <p className="text-xs text-slate-500 truncate">
-                      {user?.email}
-                    </p>
-                  </div>
+                  {activeAccount.accountType === "personal" && (
+                    <div
+                      className={`flex-1 min-w-0 transition-all duration-300 whitespace-nowrap text-start ${
+                        collapsed
+                          ? "opacity-0 -translate-x-5 w-0 overflow-hidden"
+                          : "opacity-100 translate-x-0"
+                      }`}
+                    >
+                      <p className="text-sm font-medium text-slate-900 truncate">
+                        {user?.name}
+                      </p>
+                      <p className="text-xs text-slate-500 truncate">
+                        {user?.email}
+                      </p>
+                    </div>
+                  )}
+                  {activeAccount.accountType === "business" && (
+                    <div
+                      className={`flex-1 min-w-0 transition-all duration-300 whitespace-nowrap text-start ${
+                        collapsed
+                          ? "opacity-0 -translate-x-5 w-0 overflow-hidden"
+                          : "opacity-100 translate-x-0"
+                      }`}
+                    >
+                      <p className="text-sm font-medium text-slate-900 truncate">
+                        {activeBusiness[0]?.businessName}
+                      </p>
+                      <p className="text-xs text-slate-500 truncate">
+                        {/* {user?.email} */}
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <ChevronDown className="h-4 w-4" />
               </DropdownMenuTrigger>
@@ -189,7 +220,10 @@ export default function DashboardLayout({
                     Choose Account
                   </DropdownMenuLabel>
 
-                  <DropdownMenuItem className="flex cursor-pointer items-center justify-between px-4 py-3 focus:bg-slate-100">
+                  <DropdownMenuItem
+                    onClick={() => switchToPersonal(user?.id as string)}
+                    className="flex cursor-pointer items-center justify-between px-4 py-3 focus:bg-slate-100"
+                  >
                     <div className="flex items-center gap-2">
                       <User className="h-5 w-5" />
                       <span className="text-md">Personal</span>
@@ -208,14 +242,25 @@ export default function DashboardLayout({
                   </DropdownMenuLabel>
 
                   <DropdownMenuGroup>
-                    <DropdownMenuItem className="flex cursor-pointer items-center gap-2 px-4 py-3 focus:bg-slate-100 text-md">
-                      <Building2 className="h-5 w-5" />
-                      <span>Rahim Traders</span>
-                    </DropdownMenuItem>
+                    {businesses.map((business) => (
+                      <DropdownMenuItem
+                        key={business.id}
+                        onClick={() => switchToBusiness(business.id)}
+                        className="flex cursor-pointer items-center gap-2 px-4 py-3 focus:bg-slate-100 text-md"
+                      >
+                        <Building2 className="h-5 w-5" />
+                        <span>{business.businessName}</span>
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuItem
+                      onClick={() =>
+                        router.push("/dashboard/business/create-business")
+                      }
+                      className="flex cursor-pointer items-center gap-2 px-4 py-3 focus:bg-slate-100 text-md font-semibold"
+                    >
+                      <Plus className="h-5 w-5" />
 
-                    <DropdownMenuItem className="flex cursor-pointer items-center gap-2 px-4 py-3 focus:bg-slate-100 text-md">
-                      <Building2 className="h-5 w-5" />
-                      <span>Bangla Services</span>
+                      <span> Create a business</span>
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                 </div>

@@ -52,7 +52,7 @@ const disputes = [{ id: 1 }];
 // const token = localStorage.getItem("token");
 export default function Dashboard() {
   const { user } = useAuthStore();
-  console.log(user);
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Welcome Banner */}
@@ -81,7 +81,7 @@ export default function Dashboard() {
             >
               <Link href="/dashboard/create-order">
                 <Plus className="h-4 w-4 mr-2" />
-                Add Work Event
+                Create a Link
               </Link>
             </Button>
           </div>

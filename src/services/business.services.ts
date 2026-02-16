@@ -1,4 +1,4 @@
-import { BusinessForm } from "../dashboard/business/create-business/page";
+import { BusinessForm } from "@/app/(protected)/dashboard/business/create-business/page";
 import api from "../utils/axios";
 
 export const createBusinessProfile = async (data: BusinessForm) => {

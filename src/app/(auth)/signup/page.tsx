@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/card";
 import toast from "react-hot-toast";
 import { useCreateUser } from "@/hooks/useUserMutations";
+import { cn } from "@/lib/utils";
+import Spinner from "@/components/shared/Spinner";
 
 // types
 export interface User {
@@ -33,9 +35,7 @@ export default function SignupPage() {
     confirmPassword: "",
   });
 
-  // error state
-  const [error, setError] = useState("");
-  const createUer = useCreateUser();
+  const { mutate, isPending } = useCreateUser();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -47,14 +47,16 @@ export default function SignupPage() {
       toast.error("Confirm password dose not match!", { duration: 4000 });
       return;
     }
-    setError("");
+
     const userInfo: User = {
       name: form.name,
       email: form.email,
       phone: form.phone,
       password: form.password,
     };
-    createUer.mutate(userInfo);
+
+    // call the api
+    mutate(userInfo);
   };
 
   return (
@@ -137,13 +139,19 @@ export default function SignupPage() {
                 required
               />
             </div>
-            {error && <p className="text-red-500 py-0">{error}</p>}
-            <Button
+
+            <button
               type="submit"
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
+              disabled={isPending}
+              className={cn(
+                "w-full  flex items-center justify-center gap-2 py-2 rounded-lg  text-white cursor-pointer",
+                isPending
+                  ? "bg-emerald-500/50"
+                  : "bg-emerald-600 hover:bg-emerald-700",
+              )}
             >
-              Create Account
-            </Button>
+              {isPending && <Spinner />}Create Account
+            </button>
           </form>
         </CardContent>
 

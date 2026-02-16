@@ -13,6 +13,9 @@ import {
 } from "@/components/ui/card";
 import { useRequestOTP, useVerifyOTP } from "@/hooks/useOtpMutation";
 import { useSearchParams } from "next/navigation";
+import Spinner from "@/components/shared/Spinner";
+import { cn } from "@/lib/utils";
+
 export default function VerifyOtpPage() {
   const [digits, setDigits] = useState<string[]>(Array(6).fill(""));
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
@@ -133,12 +136,18 @@ export default function VerifyOtpPage() {
               </div>
             </div>
 
-            <Button
+            <button
               type="submit"
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
+              disabled={useOTPVerify.isPending}
+              className={cn(
+                "w-full  flex items-center justify-center gap-2 py-2 rounded-lg  text-white cursor-pointer",
+                useOTPVerify.isPending
+                  ? "bg-emerald-500/50"
+                  : "bg-emerald-600 hover:bg-emerald-700",
+              )}
             >
-              {useOTPVerify.isPending ? "Verifying..." : "Verify"}
-            </Button>
+              {useOTPVerify.isPending && <Spinner />} Verify
+            </button>
           </form>
         </CardContent>
 

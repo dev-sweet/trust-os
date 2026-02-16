@@ -1,5 +1,5 @@
-import { User } from "../signup/page";
-import api from "../utils/axios";
+import { User } from "@/app/(auth)/signup/page";
+import api from "@/utils/axios";
 
 export const loginUser = async (data: { email: string; password: string }) => {
   const res = await api.post(`/api/auth/login`, data);
@@ -11,8 +11,8 @@ export const createUser = async (data: User) => {
   return res.data;
 };
 
-export const getUserProfile = async () => {
-  const res = await api.get(`/api/user/my-profile`);
+export const checkUser = async () => {
+  const res = await api.get(`/api/auth/status`);
   return res.data;
 };
 

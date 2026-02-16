@@ -3,17 +3,18 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 interface Business {
   id: string;
-  name: string;
-  businessLogo: string;
+  businessLogoUrl: string;
+  businessName: string;
 }
 
 interface User {
+  id: string;
   name: string;
   email: string;
   isEmailVerified: boolean;
-  phone: string;
   profileImageUrl: string;
-  id: string;
+  isProfileVerified: boolean;
+  uuid: string;
 }
 
 interface AuthState {

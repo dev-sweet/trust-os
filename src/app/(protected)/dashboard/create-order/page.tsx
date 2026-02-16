@@ -43,6 +43,7 @@ import {
   MoreHorizontal,
   ShieldCheck,
 } from "lucide-react";
+import { useActiveAccount } from "@/store/accoutStore";
 
 // types
 
@@ -89,9 +90,13 @@ export default function CreateOrder() {
     deliveryDate: null,
   });
 
+  // mutations
   const uploadPhoto = useUploadPhoto();
   const createOrder = useCreateOrder();
 
+  // businessId;
+  const { accountType, id } = useActiveAccount();
+  console.log("id", id);
   // handle drag & drop and file input
   const handleproofDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -134,11 +139,14 @@ export default function CreateOrder() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = await createOrder.mutateAsync({
-      ...form,
-      deliveryDate:
-        form.deliveryDate instanceof Date
-          ? form.deliveryDate.toISOString()
-          : (form.deliveryDate ?? null),
+      id: id as string,
+      data: {
+        ...form,
+        deliveryDate:
+          form.deliveryDate instanceof Date
+            ? form.deliveryDate.toISOString()
+            : (form.deliveryDate ?? null),
+      },
     });
 
     if (result.success) {

@@ -14,17 +14,31 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useLoginUser } from "@/hooks/useUserMutations";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import Spinner from "@/components/shared/Spinner";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
-  const loginUser = useLoginUser();
+  const { mutate, isPending } = useLoginUser();
+  const router = useRouter();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    loginUser.mutate(form);
+    mutate(form, {
+      onSuccess: (data) => {
+        toast.success(data.message || "Login successful");
+        if (data?.user?.isEmailVerified) {
+          router.push("/dashboard");
+        } else {
+          router.push(`/signup/verify-otp?uuid=${data?.user.uuid}`);
+        }
+      },
+    });
   };
 
   return (
@@ -69,16 +83,22 @@ export default function LoginPage() {
               />
             </div>
 
-            <Button
+            <button
               type="submit"
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
+              disabled={isPending}
+              className={cn(
+                "w-full flex items-center justify-center gap-2 py-2 rounded-lg  text-white cursor-pointer",
+                isPending
+                  ? "bg-emerald-500/50"
+                  : "bg-emerald-600 hover:bg-emerald-700",
+              )}
             >
-              {loginUser.isPending ? "Loading..." : "Login"}
-            </Button>
+              {isPending && <Spinner />} Login
+            </button>
           </form>
         </CardContent>
 
-        <CardFooter className="justify-center">
+        <CardFooter className="just]ify-center">
           <p className="text-sm text-muted-foreground">
             Don’t have an account?{" "}
             <Link

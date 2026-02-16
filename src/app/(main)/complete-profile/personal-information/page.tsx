@@ -24,8 +24,9 @@ import { Camera, UploadCloud, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { useGetUser, useUpdateUser } from "@/app/hooks/useUserMutations";
-import { useUploadPhoto } from "@/app/hooks/useUploadPhoto";
+import { useCheckUser, useUpdateUser } from "@/hooks/useUserMutations";
+import { useUploadPhoto } from "@/hooks/useUploadPhoto";
+import Spinner from "@/components/shared/Spinner";
 
 export default function CompleteProfilePage() {
   const [avatar, setAvatar] = useState<File | null>(null);
@@ -33,8 +34,8 @@ export default function CompleteProfilePage() {
   const [nidFile, setNidFile] = useState<File | null>(null);
   const [nidPreview, setNidPreview] = useState<string | null>(null);
 
-  const { data: userData, isLoading } = useGetUser();
-  console.log(userData);
+  const { data: userData, isPending } = useCheckUser();
+
   const uploadPhoto = useUploadPhoto();
   const updateUser = useUpdateUser();
   const [form, setForm] = useState({
@@ -80,7 +81,7 @@ export default function CompleteProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nidFile && !avatar)
+    if (!nidFile || !avatar)
       return toast.error("Profile Photo & NID is Require!");
 
     if (avatar && nidFile) {
@@ -109,9 +110,9 @@ export default function CompleteProfilePage() {
         setForm((prev) => {
           return {
             ...prev,
-            name: userData?.data.name,
-            email: userData?.data.email,
-            phone: userData?.data.phone,
+            name: userData?.data?.name,
+            email: userData?.data?.email,
+            phone: userData?.data?.phone,
           };
         });
       }
@@ -135,7 +136,7 @@ export default function CompleteProfilePage() {
               <Avatar className="h-24 w-24 ring-4 ring-emerald-100">
                 <AvatarImage src={avatarURL ?? ""} />
                 <AvatarFallback className="bg-emerald-100 text-emerald-700 font-semibold">
-                  {form.name.slice(0, 2).toUpperCase() || "AA"}
+                  {form.name?.slice(0, 2).toUpperCase() || "AA"}
                 </AvatarFallback>
               </Avatar>
               <Label
@@ -293,12 +294,24 @@ export default function CompleteProfilePage() {
             </div>
 
             {/* ---- Submit ---- */}
-            <Button
+            {/* <Button
               type="submit"
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
             >
               {isLoading ? "Saving..." : "Save Profile"}
-            </Button>
+            </Button> */}
+            <button
+              type="submit"
+              disabled={isPending}
+              className={cn(
+                "w-full  flex items-center justify-center gap-2 py-2 rounded-lg  text-white cursor-pointer",
+                isPending
+                  ? "bg-emerald-500/50"
+                  : "bg-emerald-600 hover:bg-emerald-700",
+              )}
+            >
+              {isPending && <Spinner />} Save Profile
+            </button>
           </form>
         </CardContent>
       </Card>
