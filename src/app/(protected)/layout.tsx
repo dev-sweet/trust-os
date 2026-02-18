@@ -30,12 +30,13 @@ import {
   User,
   Building2,
   Plus,
+  PanelRightOpen,
 } from "lucide-react";
 import { Button } from "@radix-ui/themes";
 // import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
-import { useCheckUser } from "@/hooks/useUserMutations";
+import { useCheckUser, useLogoutUser } from "@/hooks/useUserMutations";
 import Loader from "@/components/shared/Loader";
 import { useAuthStore } from "@/store/authStore";
 import {
@@ -95,19 +96,24 @@ export default function DashboardLayout({
   const profileRef = useRef<HTMLDivElement | null>(null);
 
   const { data, isLoading } = useCheckUser();
-  const { user, businesses, setUser, setBusinesses } = useAuthStore();
+  const { mutate, isPending } = useLogoutUser();
 
   const pathname = usePathname();
   const router = useRouter();
 
+  // zustand
+  const { user, businesses, setUser, setBusinesses } = useAuthStore();
   const switchToBusiness = useActiveAccount((state) => state.switchToBusiness);
-
   const switchToPersonal = useActiveAccount((state) => state.switchToPersonal);
   const activeAccount = useActiveAccount();
+
   const activeBusiness = businesses.filter(
     (business) => business.id === activeAccount.id,
   );
 
+  const handleLogout = () => {
+    mutate();
+  };
   /* Close profile dropdown on outside click */
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -137,7 +143,7 @@ export default function DashboardLayout({
     <div className="min-h-screen flex bg-gray-50">
       {/* ================= DESKTOP SIDEBAR ================= */}
       <aside
-        className={`fixed top-0 h-screen overlfow-x-auto hidden lg:flex flex-col bg-white border-r border-gray-100/60 transition-all duration-300 ${
+        className={`fixed top-0 h-screen overlfow-x-auto hidden lg:flex flex-col bg-gray-white shadow-xl border-r border-gray-100/60 transition-all duration-300 ${
           collapsed ? "w-17.5" : "w-65"
         }`}
       >
@@ -155,9 +161,13 @@ export default function DashboardLayout({
 
             <button
               onClick={() => setCollapsed(!collapsed)}
-              className="border border-gray-200/60 rounded-md p-1.5"
+              className="text-xl rounded-md p-1.5 text-gray-600"
             >
-              {collapsed ? <IoMenuOutline /> : <IoMdClose />}
+              {collapsed ? (
+                <IoMenuOutline size={28} />
+              ) : (
+                <PanelRightOpen size={28} />
+              )}
             </button>
           </div>
           {/* User */}
@@ -165,7 +175,7 @@ export default function DashboardLayout({
             <DropdownMenu>
               <DropdownMenuTrigger
                 className={cn(
-                  "w-full flex items-center justify-between bg-white py-2 outline-none",
+                  "w-full flex items-center justify-between bg-white py-2 outline-none rounded-lg",
                   !collapsed && "px-2  border border-gray-300",
                 )}
               >
@@ -276,10 +286,10 @@ export default function DashboardLayout({
               key={item.label}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all font-semibold",
                 pathname === item.href
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "text-slate-600 hover:bg-emerald-100  hover:text-emerald-700 transition-all duration-300",
               )}
             >
               <span className="text-xl">{item.icon}</span>
@@ -298,6 +308,7 @@ export default function DashboardLayout({
         {/* Logout */}
         <div className="left-0 bottom-0 mt-2 px-4 pb-2 border-t border-slate-100">
           <Button
+            onClick={handleLogout}
             variant="ghost"
             className=" p-2 flex items-center w-full justify-start gap-3 text-slate-600 hover:text-red-600 hover:bg-red-50 cursor-pointer"
             // onClick={handleLogout}
@@ -310,7 +321,7 @@ export default function DashboardLayout({
                   : "opacity-100 translate-x-0"
               }`}
             >
-              Logout
+              {isPending ? "Logging Out..." : "Logout"}
             </span>
           </Button>
         </div>
@@ -323,7 +334,7 @@ export default function DashboardLayout({
         )}
       >
         {/* ================= HEADER ================= */}
-        <header className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100/60">
+        <header className="right-0 flex items-center justify-between px-4 py-3 bg-gray-100 border-b border-gray-500/30">
           <div className="flex items-center gap-3 flex-1">
             <button
               onClick={() => setMobileOpen(true)}
@@ -331,7 +342,7 @@ export default function DashboardLayout({
             >
               <IoMenuOutline />
             </button>
-            <div className="lg:w-auto w-7/10 flex items-center gap-4">
+            {/* <div className="lg:w-auto w-7/10 flex items-center gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <input
@@ -340,7 +351,7 @@ export default function DashboardLayout({
                   className="w-64 h-10 pl-10 pr-4 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                 />
               </div>
-            </div>
+            </div> */}
           </div>
           <div className="flex items-center gap-2">
             <Button

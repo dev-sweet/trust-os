@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Plus,
   Search,
@@ -29,6 +29,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import WorkEventCard from "@/components/work/WorkEventCard";
 // import WorkEventSkeleton from "@/components/work/WorkEventSkeleton";
 import EmptyState from "@/components/ui/EmptyState";
+import api from "@/utils/axios";
 
 // Types
 type EventStatus =
@@ -204,6 +205,11 @@ export default function WorkLedgerStatic() {
     setPage(1);
   };
 
+  useEffect(() => {
+    api.get("/api/user/my-profile").then((res) => {
+      console.log(res.data);
+    });
+  }, []);
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Page Header */}

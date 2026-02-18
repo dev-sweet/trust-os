@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   X,
   UploadCloud,
@@ -17,14 +17,15 @@ import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useGetLinkInfo } from "@/hooks/useReviewMutations";
+import { useGetLinkInfo, useSubmitReview } from "@/hooks/useReviewMutations";
 import { useParams } from "next/navigation";
 import Loader from "@/components/shared/Loader";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 type ReviewType =
   | "COMPLETED_AS_AGREED"
-  | "COMPLETED_WITH_AN_ISSUE"
+  | "COMPLETED_WITH_ISSUE"
   | "NOT_COMPLETED";
 
 export default function ReviewPage() {
@@ -41,25 +42,34 @@ export default function ReviewPage() {
   const linkText = params?.link as string;
   const uuid = linkText.split("-").slice(0, 5)?.join("-");
 
-  console.log("uuid", uuid);
   const { data, isPending } = useGetLinkInfo(uuid);
-  console.log(data);
+  const { mutate, isPending: isPendingSubmit } = useSubmitReview();
+
   // handle submit
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selected) {
+      toast.error("Must be select a review card");
+      return;
+    }
+
+    if (selected !== "COMPLETED_AS_AGREED" && !complaint) {
+      toast.error("Please tell us your issue.");
+      return;
+    }
     const formData = new FormData();
 
-    formData.append("review", selected as string);
-    formData.append("complain", complaint as string);
-    formData.append("attachment", imageFile as File);
-    // console.log({
-    //   selected,
-    //   complaint,
-    //   imageFile,
-    // });
+    formData.append("review", selected);
+    formData.append("orderUuid", uuid);
 
-    console.log("formData", formData);
-    alert("Review Submitted!");
+    if (complaint) {
+      formData.append("complain", complaint);
+    }
+    if (imageFile) {
+      formData.append("attachment", imageFile);
+    }
+
+    mutate(formData);
   };
 
   const handleImageDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -93,7 +103,7 @@ export default function ReviewPage() {
           You have already submitted a review. Thank you!
         </p>
         <button className="btn bg-emerald-500 p-2 rounded-md text-white hover:bg-emerald-700 cursor-pointer mt-5">
-          Go to Home
+          Go Home
         </button>
       </div>
     );
@@ -115,63 +125,72 @@ export default function ReviewPage() {
     );
   }
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-8">
-      <p className="mb-4 text-gray-800">
-        Help us maintain a trustworthy platform by sharing your experience.
-        Honest feedback builds confidence for everyone.
-      </p>
-      <div className="w-full  bg-gray-50 p-5 rounded-2xl border border-gray-200">
-        <div className="flex items-center gap-2 mb-3 text-gray-400">
-          <Info size={16} />
-          <span className="text-[10px] uppercase tracking-widest font-bold">
-            Order Details
+    <div className="max-w-3xl  mx-auto p-6 space-y-8">
+      <div className="mb-8 text-center">
+        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+          Amr Astha
+        </h1>
+        <p className="text-gray-500 mt-2  mx-auto font-semibold">
+          Your review helps build trust in our marketplace. Whether your
+          experience was positive or negative, honest feedback matters.
+        </p>
+      </div>
+      {/* order info */}
+      <div className="bg-gray-200/20 p-6 text-white rounded-lg">
+        <div className="flex items-center gap-2 text-emerald-400 mb-4">
+          <Info size={18} />
+          <span className="text-xs font-bold uppercase tracking-widest">
+            Order Verification
           </span>
         </div>
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-gray-500">Invoice Number:</span>
-            <span className="text-sm font-mono text-gray-800">
-              {data.orderDetails.invoiceNumber}
-            </span>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div>
+            <p className="text-[10px] text-gray-400 uppercase font-bold">
+              Invoice
+            </p>
+            <p className="text-sm font-bold text-emerald-400">
+              INV-{data.orderDetails.invoiceNumber}
+            </p>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-gray-500">Product:</span>
-            <span className="text-sm font-medium text-gray-800">
+          <div className="col-span-1 md:col-span-2">
+            <p className="text-[10px] text-gray-400 uppercase font-bold">
+              Product
+            </p>
+            <p className="text-sm text-emerald-400 font-medium truncate">
               {data.orderDetails.productName}
-            </span>
+            </p>
           </div>
-          <div className="flex justify-between items-center border-t border-gray-200 pt-2 mt-2">
-            <span className="text-xs text-gray-500">Description:</span>
-            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded text-[10px] font-bold">
-              {data.orderDetails.productDescription}
-            </span>
-          </div>
-          <div className="flex justify-between items-center border-t border-gray-200 pt-2 mt-2">
-            <span className="text-xs text-gray-500">Quantity:</span>
-            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded text-[10px] font-bold">
-              {data.orderDetails.productQuantity}
-            </span>
-          </div>
-          <div className="flex justify-between items-center border-t border-gray-200 pt-2 mt-2">
-            <span className="text-xs text-gray-500">Price per item:</span>
-            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded text-[10px] font-bold">
+          <div>
+            <p className="text-[10px] text-gray-400 uppercase font-bold">
+              Total
+            </p>
+            <p className="text-sm font-bold text-emerald-400">
               ${data.orderDetails.productPrice}
-            </span>
+            </p>
           </div>
-          <div className="flex justify-between items-center border-t border-gray-200 pt-2 mt-2">
-            <span className="text-xs text-gray-500">Order Date:</span>
-            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded text-[10px] font-bold">
-              ${data.orderDetails.orderDate}
-            </span>
+          <div>
+            <p className="text-[10px] text-gray-400 uppercase font-bold">
+              Order Date:
+            </p>
+            <p className="text-sm font-bold text-emerald-400">
+              {new Date(data.orderDetails.orderDate).toDateString()}
+            </p>
           </div>
-          <div className="flex justify-between items-center border-t border-gray-200 pt-2 mt-2">
-            <span className="text-xs text-gray-500">Delivery Date:</span>
-            <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded text-[10px] font-bold">
-              ${data.orderDetails.deliveryDate}
-            </span>
+          <div>
+            <p className="text-[10px] text-gray-400 uppercase font-bold">
+              Delivery Date:
+            </p>
+            <p className="text-sm font-bold text-emerald-400">
+              {new Date(data.orderDetails.deliveryDate).toDateString()}
+            </p>
           </div>
         </div>
       </div>
+      <p className="mb-4 text-gray-800">
+        Take a moment to share how your transaction went. Whether it was smooth
+        or had issues, your feedback keeps our marketplace trustworthy for
+        everyone.
+      </p>
 
       {/* Review Cards */}
       <div className="grid grid-cols-3 gap-4">
@@ -189,10 +208,10 @@ export default function ReviewPage() {
         </button>
         <button
           type="button"
-          onClick={() => setSelected("COMPLETED_WITH_AN_ISSUE")}
+          onClick={() => setSelected("COMPLETED_WITH_ISSUE")}
           className={cn(
             "border border-gray-300 md:rounded-xl rounded-md md:p-6 p-2 text-center hover:border-yellow-300 hover:bg-yellow-50  transition-all duration-200",
-            selected === "COMPLETED_WITH_AN_ISSUE" &&
+            selected === "COMPLETED_WITH_ISSUE" &&
               "border-yellow-500 bg-yellow-50 text-yellow-500",
           )}
         >
@@ -219,7 +238,7 @@ export default function ReviewPage() {
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4 rounded-xl">
         {/* Conditional fields */}
-        {(selected === "COMPLETED_WITH_AN_ISSUE" ||
+        {(selected === "COMPLETED_WITH_ISSUE" ||
           selected === "NOT_COMPLETED") && (
           <>
             <div className="space-y-2">
@@ -296,7 +315,7 @@ export default function ReviewPage() {
           type="submit"
           className="w-full bg-emerald-600 text-white py-2 rounded-md hover:bg-emerald-700 transition cursor-pointer"
         >
-          Submit Review
+          {isPendingSubmit ? "Submitting Review..." : " Submit Review"}
         </button>
       </form>
     </div>

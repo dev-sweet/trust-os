@@ -6,6 +6,10 @@ export const loginUser = async (data: { email: string; password: string }) => {
   return res.data;
 };
 
+export const LogoutUser = async () => {
+  const res = await api.post("/api/auth/logout");
+  return res.data;
+};
 export const createUser = async (data: User) => {
   const res = await api.post("/api/auth/register", data);
   return res.data;
@@ -16,7 +20,11 @@ export const checkUser = async () => {
   return res.data;
 };
 
-export const updateUserProfile = async (data: any) => {
+export const updateUserProfile = async (data: {
+  name: string;
+  phone: string;
+  address: string;
+}) => {
   const res = await api.patch("/api/user/my-profile", data);
   return res.data;
 };

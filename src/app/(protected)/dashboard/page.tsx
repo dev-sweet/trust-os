@@ -56,7 +56,7 @@ export default function Dashboard() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Welcome Banner */}
-      <div className="bg-linear-to-r from-emerald-600 to-emerald-700 rounded-2xl p-6 text-white">
+      <div className="bg-linear-to-r  from-emerald-700 to-teal-600 rounded-lg p-6 text-white">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-emerald-100 text-sm mb-1">Welcome,</p>
