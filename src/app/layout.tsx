@@ -4,7 +4,6 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import QuerProvider from "@/Providers/QueryProvider";
 import { NextIntlClientProvider } from "next-intl";
-
 const raleway = Raleway({
   variable: "--font-raleway",
   subsets: ["latin"],
