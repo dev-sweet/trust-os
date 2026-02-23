@@ -30,131 +30,37 @@ import WorkEventCard from "@/components/work/WorkEventCard";
 // import WorkEventSkeleton from "@/components/work/WorkEventSkeleton";
 import EmptyState from "@/components/ui/EmptyState";
 import api from "@/utils/axios";
+import { useActiveAccount } from "@/store/accoutStore";
+import { useGetAllOrders } from "@/hooks/useOrderMutations";
 
-// Types
-type EventStatus =
-  | "PENDING_CONFIRMATION"
-  | "CONFIRMED"
-  | "ISSUE"
-  | "FAILED"
-  | "EXPIRED"
-  | "CANCELLED";
-
-type EventCategory =
-  | "SELLER"
-  | "TUTOR"
-  | "RIDER"
-  | "TECHNICIAN"
-  | "FREELANCER"
-  | "OTHER";
-
-interface WorkEvent {
-  id: string;
-  workType: string;
-  counterpartyName: string;
-  description: string;
-  occurredAt: Date;
-  status: EventStatus;
-  category: EventCategory;
-}
-// -----------------------------
-// Static Translations
-// -----------------------------
-const t = {
-  title: "Work Ledger",
-  subtitle: "All your work records",
-  addEvent: "Add Event",
-  search: "Search...",
-  allStatus: "All Status",
-  pending: "Pending",
-  confirmed: "Confirmed",
-  issue: "Issue",
-  failed: "Failed",
-  expired: "Expired",
-  cancelled: "Cancelled",
-  allCategories: "All Categories",
-  seller: "Seller",
-  tutor: "Tutor",
-  rider: "Rider",
-  technician: "Technician",
-  freelancer: "Freelancer",
-  other: "Other",
-  dateRange: "Date",
-  noEvents: "No events found",
-  noEventsDesc: "Add your first work event to start building trust",
-  showing: "Showing",
-  of: "of",
-  events: "events",
-  export: "Export",
+type SellerReviews = {
+  id: number;
+  review: "COMPLETED_AS_AGREED" | string;
+  isReviewed: boolean;
 };
 
-// -----------------------------
-// Static Events
-// -----------------------------
-const staticEvents: WorkEvent[] = [
-  {
-    id: "1",
-    workType: "Website Design",
-    counterpartyName: "John Doe",
-    description: "Landing page design for client",
-    occurredAt: new Date("2026-01-10"),
-    status: "CONFIRMED",
-    category: "FREELANCER",
-  },
-  {
-    id: "2",
-    workType: "Delivery",
-    counterpartyName: "Jane Smith",
-    description: "Delivered documents",
-    occurredAt: new Date("2026-01-12"),
-    status: "PENDING_CONFIRMATION",
-    category: "RIDER",
-  },
-  {
-    id: "3",
-    workType: "Tutoring Session",
-    counterpartyName: "Ali Khan",
-    description: "Math tutoring",
-    occurredAt: new Date("2026-01-15"),
-    status: "CONFIRMED",
-    category: "TUTOR",
-  },
-  {
-    id: "4",
-    workType: "Software Setup",
-    counterpartyName: "Sara Ahmed",
-    description: "Installed ERP software",
-    occurredAt: new Date("2026-01-16"),
-    status: "ISSUE",
-    category: "TECHNICIAN",
-  },
-];
+type Meta = {
+  totalOrders: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+};
 
-// -----------------------------
-// Constants
-// -----------------------------
-const statusOptions = [
-  { value: "all", label: t.allStatus },
-  { value: "PENDING_CONFIRMATION", label: t.pending },
-  { value: "CONFIRMED", label: t.confirmed },
-  { value: "ISSUE", label: t.issue },
-  { value: "FAILED", label: t.failed },
-  { value: "EXPIRED", label: t.expired },
-  { value: "CANCELLED", label: t.cancelled },
-];
-
-const categoryOptions = [
-  { value: "all", label: t.allCategories },
-  { value: "SELLER", label: t.seller },
-  { value: "TUTOR", label: t.tutor },
-  { value: "RIDER", label: t.rider },
-  { value: "TECHNICIAN", label: t.technician },
-  { value: "FREELANCER", label: t.freelancer },
-  { value: "OTHER", label: t.other },
-];
-
-const PAGE_SIZE = 10;
-
+export type WorkLedger = {
+  customerEmail: string;
+  customerName: string;
+  customerPhone: string;
+  deliveryDate: string;
+  id: number;
+  invoiceNumber: string;
+  link: string;
+  linkExpiry: string;
+  meta: Meta;
+  orderDate: string;
+  productName: string;
+  sellerReviews: SellerReviews;
+  uuid: string;
+};
 // -----------------------------
 // Component
 // -----------------------------
@@ -166,35 +72,10 @@ export default function WorkLedgerStatic() {
   const [dateTo, setDateTo] = useState<Date | null>(null);
   const [page, setPage] = useState(1);
 
-  // -----------------------------
-  // Filter Events
-  // -----------------------------
-  const filteredEvents = staticEvents.filter((event) => {
-    if (statusFilter !== "all" && event.status !== statusFilter) return false;
-    if (categoryFilter !== "all" && event.category !== categoryFilter)
-      return false;
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      if (
-        !event.workType.toLowerCase().includes(query) &&
-        !event.counterpartyName.toLowerCase().includes(query) &&
-        !event.description.toLowerCase().includes(query)
-      )
-        return false;
-    }
-    if (dateFrom && event.occurredAt < dateFrom) return false;
-    if (dateTo && event.occurredAt > dateTo) return false;
-    return true;
-  });
+  const totalPages = 10; // Math.ceil(filteredEvents.length / PAGE_SIZE);  
+  const {id:businessId} = useActiveAccount();
+  const {data:workEvents,isLoading} = useGetAllOrders(businessId as string);
 
-  // -----------------------------
-  // Pagination
-  // -----------------------------
-  const totalPages = Math.ceil(filteredEvents.length / PAGE_SIZE);
-  const paginatedEvents = filteredEvents.slice(
-    (page - 1) * PAGE_SIZE,
-    page * PAGE_SIZE,
-  );
 
   const clearFilters = () => {
     setStatusFilter("all");
@@ -205,21 +86,21 @@ export default function WorkLedgerStatic() {
     setPage(1);
   };
 
-  useEffect(() => {
-    api.get("/api/user/my-profile").then((res) => {
-      console.log(res.data);
-    });
-  }, []);
+  // useEffect(() => {
+  //   api.get(`/api/user/orders?businessId=${businessId}`).then((res) => {
+  //     console.log(res.data);
+  //   });
+  // }, []);
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Page Header */}
       <PageHeader
-        title={t.title}
-        description={t.subtitle}
+        title="Work Ledger"
+        description="View and manage your work events"
         actions={
           <Button>
             <Plus className="h-4 w-4 mr-2" />
-            {t.addEvent}
+            Add Event
           </Button>
         }
       />
@@ -231,7 +112,7 @@ export default function WorkLedgerStatic() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
-              placeholder={t.search}
+              placeholder='Search by customer, product, or invoice...'
               value={searchQuery}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setSearchQuery(e.target.value)
@@ -246,15 +127,15 @@ export default function WorkLedgerStatic() {
             onValueChange={(v) => setStatusFilter(v)}
           >
             <SelectTrigger className="w-full sm:w-40">
-              <SelectValue placeholder={t.allStatus} />
+              <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
-            <SelectContent>
+            {/* <SelectContent>
               {statusOptions.map((s) => (
                 <SelectItem key={s.value} value={s.value}>
                   {s.label}
                 </SelectItem>
               ))}
-            </SelectContent>
+            </SelectContent> */}
           </Select>
 
           {/* Category Filter */}
@@ -263,15 +144,15 @@ export default function WorkLedgerStatic() {
             onValueChange={(v) => setCategoryFilter(v)}
           >
             <SelectTrigger className="w-full sm:w-40">
-              <SelectValue placeholder={t.allCategories} />
+              <SelectValue placeholder="All Categories" />
             </SelectTrigger>
-            <SelectContent>
+            {/* <SelectContent>
               {categoryOptions.map((c) => (
                 <SelectItem key={c.value} value={c.value}>
                   {c.label}
                 </SelectItem>
               ))}
-            </SelectContent>
+            </SelectContent> */}
           </Select>
 
           {/* Date Range */}
@@ -279,7 +160,7 @@ export default function WorkLedgerStatic() {
             <PopoverTrigger asChild>
               <Button variant="outline" className="w-full sm:w-auto">
                 <Calendar className="h-4 w-4 mr-2" />
-                {dateFrom ? format(dateFrom, "dd/MM") : t.dateRange}
+                {/* {dateFrom ? format(dateFrom, "dd/MM") : } */}
                 {dateTo && ` - ${format(dateTo, "dd/MM")}`}
               </Button>
             </PopoverTrigger>
@@ -301,7 +182,7 @@ export default function WorkLedgerStatic() {
         </div>
 
         {/* Active Filters Summary */}
-        {(statusFilter !== "all" ||
+        {/* {(statusFilter !== "all" ||
           categoryFilter !== "all" ||
           searchQuery ||
           dateFrom) && (
@@ -314,32 +195,35 @@ export default function WorkLedgerStatic() {
               Clear filters
             </Button>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Events List */}
-      <div className="space-y-3">
-        {paginatedEvents.length === 0 ? (
+      {
+        isLoading ? <h1>Loading...</h1> : <div className="space-y-3">
+        {workEvents?.length === 0 ? (
           <EmptyState
             icon={FileText}
-            title={t.noEvents}
-            description={t.noEventsDesc}
-            actionLabel={t.addEvent}
+            title='No work events found'
+            description="You haven't added any work events yet."
+            actionLabel="Add Event"
           />
         ) : (
-          paginatedEvents.map((event) => (
-            <WorkEventCard key={event.id} event={event} />
+          workEvents?.map((event:WorkLedger) => (
+            <WorkEventCard key={event.id} order={event} />
           ))
         )}
       </div>
+      }
+      
 
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between bg-white rounded-xl border border-slate-200 px-4 py-3">
           <span className="text-sm text-slate-500">
-            {t.showing} {(page - 1) * PAGE_SIZE + 1}-
+            {/* {t.showing} {(page - 1) * PAGE_SIZE + 1}-
             {Math.min(page * PAGE_SIZE, filteredEvents.length)} {t.of}{" "}
-            {filteredEvents.length}
+            {filteredEvents.length} */}
           </span>
           <div className="flex items-center gap-2">
             <Button
@@ -351,13 +235,14 @@ export default function WorkLedgerStatic() {
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span className="text-sm font-medium px-2">
-              {page} / {totalPages}
+
+              {/* {page} s */}
             </span>
             <Button
               variant="outline"
               size="icon"
-              disabled={page === totalPages}
-              onClick={() => setPage((p) => p + 1)}
+              // disabled={page === totalPages}
+              // onClick={() => setPage((p) => p + 1)}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>

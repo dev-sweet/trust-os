@@ -1,5 +1,47 @@
 {
-  "HomePage": {
-    "title": "Hello world! Welcome to homepage"
+  "DasboardMenu": {
+    "home": "Home",
+    "actionCenter": "Action Center",
+    "trustCenter": "Trust Center",
+    "workLedger": "Work Ledger",
+    "disputes": "Disputes",
+    "inbox": "Inbox",
+    "share": "Share",
+    "supportTickets": "Support Tickets",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "DashboardPage": {
+  "welcome": "Welcome,",
+  "shareProfile": "Share Profile",
+  "createLink": "Create a Link",
+  "pendingActions": "Pending Actions",
+  "confirmedEvents": "Confirmed Events",
+  "openDisputes": "Open Disputes",
+  "yourTrustSummary": "Your Trust Summary",
+  "trustLevel": "Trust Level",
+  "buildingTrust": "Building trust",
+  "confirmed": "Confirmed",
+  "uniqueClients": "Unique Clients",
+  "openDisputesCount": "Open Disputes",
+  "improveTrust": "Improve Trust",
+  "verifyIdentity": "Verify your identity",
+  "verifiedIdentity": "Identity verified",
+  "confirmedEventsSummary": "confirmed events",
+  "noUnresolvedDisputes": "No unresolved disputes",
+  "workWithMoreClients": "Work with more clients",
+  "recentActivity": "Recent Activity",
+  "seller": "Seller",
+  "freelancer": "Freelancer",
+  "pendingConfirmation": "Pending Confirmation",
+  "waitingForConfirmations": "{count} pending confirmations",
+  "waitingForCustomer": "Waiting for customer confirmations",
+  "goToActionCenter": "Go to Action Center",
+  "quickResolution": "Quick resolution protects your trust",
+  "viewDisputes": "View Disputes",
+  "activityItems": {
+    "websiteDevelopment": "Website Development",
+    "mobileAppUIDesign": "Mobile App UI Design"
   }
+}
 }

@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 export default getRequestConfig(async () => {
   const cookieStore = await cookies();
-  const locale = cookieStore.get("MY_LOCALE")?.value || "en";
+  const locale = cookieStore.get("locale")?.value || "en";
 
   return {
     locale, // This is what getLocale() in the layout reads!

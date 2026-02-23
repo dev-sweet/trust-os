@@ -15,11 +15,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrustCard } from "@/components/trust/TrustBadge";
-import WorkEventCard, { Event } from "@/components/work/WorkEventCard";
+import WorkEventCard from "@/components/work/WorkEventCard";
 import StatCard from "@/components/ui/StatCard";
 import EmptyState from "@/components/ui/EmptyState";
 import TrustReasons from "@/components/trust/TrustReasons";
 import { useAuthStore } from "@/store/authStore";
+import { useTranslations } from "use-intl";
+import { useGetAllOrders } from "@/hooks/useOrderMutations";
+import { useActiveAccount } from "@/store/accoutStore";
 
 /* -----------------------------
    STATIC MOCK DATA
@@ -30,20 +33,6 @@ const trustSnapshot = {
   confirmedCount: 14,
 };
 
-const recentEvents: Event[] = [
-  {
-    id: "1",
-    title: "Website Development",
-    status: "CONFIRMED",
-    category: "SELLER",
-  },
-  {
-    id: "2",
-    title: "Mobile App UI Design",
-    status: "PENDING_CONFIRMATION",
-    category: "FREELANCER",
-  },
-];
 
 const pendingEvents = [{ id: 1 }, { id: 2 }];
 const disputes = [{ id: 1 }];
@@ -51,16 +40,26 @@ const disputes = [{ id: 1 }];
 // const cookieStore = cookies();
 // const token = localStorage.getItem("token");
 export default function Dashboard() {
+  const activeAccount = useActiveAccount();
+  console.log('Active Account:', activeAccount);
+
+  const {data:recentEvents,isLoading} = useGetAllOrders(activeAccount?.id as string);
+  console.log('Recent Events:', recentEvents);
   const { user } = useAuthStore();
 
+  const t = useTranslations('DashboardPage');
+  
+  if(isLoading){
+    return <div>Loading...</div>
+  }
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       {/* Welcome Banner */}
       <div className="bg-linear-to-r  from-emerald-700 to-teal-600 rounded-lg p-6 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-emerald-100 text-sm mb-1">Welcome,</p>
-            <h1 className="text-  2xl font-bold">{user?.name}</h1>
+            <p className="text-emerald-100 text-sm mb-1">{t('welcome')}</p>
+            <h1 className="text-2xl font-bold">{user?.name}</h1>
           </div>
 
           <div className="hidden sm:flex items-center gap-3">
@@ -71,7 +70,7 @@ export default function Dashboard() {
             >
               <Link href="/dashboard/share">
                 <Share2 className="h-4 w-4 mr-2" />
-                Share Profile
+                {t('shareProfile')}
               </Link>
             </Button>
 
@@ -81,7 +80,7 @@ export default function Dashboard() {
             >
               <Link href="/dashboard/create-order">
                 <Plus className="h-4 w-4 mr-2" />
-                Create a Link
+                {t('createLink')}
               </Link>
             </Button>
           </div>
@@ -93,13 +92,13 @@ export default function Dashboard() {
         <Button asChild>
           <Link href="create-order">
             <Plus className="h-4 w-4 mr-2" />
-            Add Work Event
+            {t('createLink')}
           </Link>
         </Button>
         <Button variant="outline" asChild>
           <Link href="/dashboard/share">
             <Share2 className="h-4 w-4 mr-2" />
-            Share Profile
+            {t('shareProfile')}
           </Link>
         </Button>
       </div>
@@ -107,14 +106,14 @@ export default function Dashboard() {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard
-          title="Pending Actions"
+          title={t('pendingActions')}
           value={pendingEvents.length}
           icon={Clock}
           iconBg="bg-amber-100"
           iconColor="text-amber-600"
         />
         <StatCard
-          title="Confirmed Events"
+          title={t('confirmedEvents')}
           value={trustSnapshot.confirmedCount}
           icon={CheckCircle2}
           trend="down"
@@ -123,7 +122,7 @@ export default function Dashboard() {
           iconColor="text-emerald-600"
         />
         <StatCard
-          title="Open Disputes"
+          title={t('openDisputes')}
           value={disputes.length}
           icon={AlertTriangle}
           iconBg="bg-red-100"
@@ -138,22 +137,22 @@ export default function Dashboard() {
           {/* Trust Summary */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Your Trust Summary</h2>
+              <h2 className="text-lg font-semibold">{t('yourTrustSummary')}</h2>
               <Link
                 href="/trust-center"
                 className="text-sm text-emerald-600 flex items-center gap-1"
               >
-                View All
+              View All
                 <ChevronRight className="h-4 w-4" />
               </Link>
             </div>
-            <TrustCard snapshot={trustSnapshot} />
+            <TrustCard  snapshot={trustSnapshot} />
           </div>
 
           {/* Recent Activity */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Recent Activity</h2>
+              <h2 className="text-lg font-semibold">{t('recentActivity')}</h2>
               <Link
                 href="/work-ledger"
                 className="text-sm text-emerald-600 flex items-center gap-1"
@@ -172,8 +171,8 @@ export default function Dashboard() {
                   actionHref="/work-events/add"
                 />
               ) : (
-                recentEvents.map((event) => (
-                  <WorkEventCard key={event.id} event={event} />
+                recentEvents.map((event:any) => (
+                  <WorkEventCard key={event.id} order={event} />
                 ))
               )}
             </div>
@@ -187,7 +186,7 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Sparkles className="h-4 w-4 text-amber-500" />
-                Improve Trust
+                {t('improveTrust')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -203,16 +202,16 @@ export default function Dashboard() {
                   <Clock className="h-5 w-5 text-amber-600" />
                   <div>
                     <h4 className="font-medium">
-                      {pendingEvents.length} pending confirmations
+                      {pendingEvents.length} {t('pendingConfirmation')}
                     </h4>
                     <p className="text-sm text-amber-700">
-                      Waiting for customer confirmations
+                      {t('waitingForCustomer')}
                     </p>
                     <Link
                       href="/action-center"
                       className="inline-flex items-center gap-1 text-sm font-medium text-amber-700 mt-2"
                     >
-                      Go to Action Center
+                      {t('goToActionCenter')}
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </div>
@@ -229,16 +228,16 @@ export default function Dashboard() {
                   <AlertTriangle className="h-5 w-5 text-red-600" />
                   <div>
                     <h4 className="font-medium">
-                      {disputes.length} open disputes
+                      {disputes.length} {t('openDisputesCount')}
                     </h4>
                     <p className="text-sm text-red-700">
-                      Quick resolution protects your trust
+                      {t('quickResolution')}
                     </p>
                     <Link
                       href="/disputes"
                       className="inline-flex items-center gap-1 text-sm font-medium text-red-700 mt-2"
                     >
-                      View Disputes
+                      {t('viewDisputes')}
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </div>

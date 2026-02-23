@@ -20,8 +20,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const messages = getMessages();
-  const locale = getLocale();
+  const messages = await getMessages();
+  const locale = await getLocale();
 
   return (
     <html lang="en">
@@ -30,7 +30,7 @@ export default async function RootLayout({
         className={`${raleway.variable}`}
       >
         <QuerProvider>
-          <NextIntlClientProvider locale="en">
+          <NextIntlClientProvider locale={locale} messages={messages}>
             {children}
             <Toaster />
           </NextIntlClientProvider>

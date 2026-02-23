@@ -1,10 +1,8 @@
 // import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { cn } from "../lib/utils";
-import { getTranslations } from "next-intl/server";
 
-const page = async () => {
-  const t = await getTranslations("HomePage");
+const page = () => {
   return (
     <div className="max-w-8/12 mx-auto text-center py-20">
       <h3 className="text-3xl">
@@ -20,7 +18,6 @@ const page = async () => {
         Go Home
       </Link>
 
-      <p>{t("title")}</p>
     </div>
   );
 };

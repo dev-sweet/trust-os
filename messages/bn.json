@@ -1,0 +1,44 @@
+{
+    "DasboardMenu": {
+    "home": "হোম",
+    "actionCenter": "অ্যাকশন সেন্টার",
+    "trustCenter": "ট্রাস্ট সেন্টার",
+    "workLedger": "ওয়ার্ক লেজার",
+    "disputes": "বিরোধ",
+    "inbox": "ইনবক্স",
+    "share": "শেয়ার",
+    "supportTickets": "সাপোর্ট টিকেট",
+    "settings": "সেটিংস",
+    "logout": "লগ আউট"
+  },
+  "DashboardPage":{
+  "welcome": "স্বাগতম,",
+  "shareProfile": "প্রোফাইল শেয়ার করুন",
+  "createLink": "একটি লিঙ্ক তৈরি করুন", 
+  "pendingActions": "মুলতুবি অ্যাকশন",
+  "confirmedEvents": "নিশ্চিত ইভেন্ট",
+  "openDisputes": "মুক্ত বিরোধ",
+  "yourTrustSummary": "আপনার ট্রাস্ট সারসংক্ষেপ",
+  "trustLevel": "ট্রাস্ট স্তর",
+  "buildingTrust": "ট্রাস্ট গঠন করা হচ্ছে",
+  "confirmed": "নিশ্চিত",
+  "uniqueClients": "অনন্য ক্লায়েন্ট",
+  "openDisputesCount": "মুক্ত বিরোধ",
+  "improveTrust": "ট্রাস্ট উন্নত করুন",
+  "verifyIdentity": "আপনার পরিচয় যাচাই করুন",
+   "verifiedIdentity": "পরিচয় নিশ্চিত করা হয়েছে",
+  "confirmedEventsSummary": "নিশ্চিত ইভেন্ট",
+  "noUnresolvedDisputes": "কোনও অবরুদ্ধ বিরোধ নেই",
+  "workWithMoreClients": "আরও ক্লায়েন্টের সঙ্গে কাজ করুন",
+  "recentActivity": "সাম্প্রতিক কার্যক্রম",
+  "seller": "বিক্রেতা",
+  "freelancer": "ফ্রিল্যান্সার",
+  "pendingConfirmation": "নিশ্চিতকরণের অপেক্ষায়",
+  "waitingForConfirmations": "{count} নিশ্চিতকরণের অপেক্ষায়",
+  "waitingForCustomer": "গ্রাহকের নিশ্চিতকরণের জন্য অপেক্ষা করছে",
+  "goToActionCenter": "অ্যাকশন সেন্টারে যান",
+  "quickResolution": "দ্রুত সমাধান আপনার ট্রাস্ট রক্ষা করে",
+  "viewDisputes": "বিরোধ দেখুন"
+}
+}
+

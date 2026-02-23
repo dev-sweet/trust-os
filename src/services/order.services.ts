@@ -8,7 +8,17 @@ export const createOrder = async ({
   id: string;
   data: OrderForm;
 }) => {
-  console.log("id", id);
   const res = await api.post(`/api/user/orders/create?businessId=${id}`, data);
   return res.data;
 };
+
+
+export const getAllOrders = async (id:string) =>{
+  const res = await api.get(`/api/user/orders?businessId=${id}`);
+  return res.data
+}
+
+export const getOrderDetails = async(uuid:string) =>{
+  const res = await api.get(`/api/user/orders/details?uuid=${uuid}`);
+  return res.data
+}

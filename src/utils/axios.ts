@@ -18,7 +18,6 @@ api.interceptors.response.use(
       }
       return Promise.reject(error);
     }
-
     toast.error(message);
     return Promise.reject(error);
   },

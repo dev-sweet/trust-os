@@ -1,6 +1,7 @@
 "use client";
 import { Shield, ShieldCheck, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 const trustLevelConfig = {
   NEW: {
@@ -101,13 +102,13 @@ export function TrustCard({
   const level = snapshot?.trustLevel || "NEW";
   const config = trustLevelConfig[level];
   const Icon = config.icon;
-
+  const t = useTranslations('DashboardPage');
   const stats = [
-    { label: "Confirmed", value: snapshot?.confirmedCount ?? 0 },
-    { label: "Unique Clients", value: snapshot?.uniqueConfirmersCount ?? 0 },
-    { label: "Open Disputes", value: snapshot?.unresolvedDisputesCount ?? 0 },
+    { label: t('confirmedEvents'), value: snapshot?.confirmedCount ?? 0 },
+    { label: t('uniqueClients'), value: snapshot?.uniqueConfirmersCount ?? 0 },
+    { label: t('openDisputesCount'), value: snapshot?.unresolvedDisputesCount ?? 0 },
   ];
-
+ 
   return (
     <div
       className={cn(
@@ -128,7 +129,7 @@ export function TrustCard({
         </div>
         <div>
           <h3 className={cn("text-xl font-bold", config.textColor)}>
-            Trust Level: {config.label}
+           {t('trustLevel')}: {config.label}
           </h3>
           <p className="text-sm text-slate-500">{config.description}</p>
         </div>

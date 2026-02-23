@@ -4,5 +4,6 @@ import { uploadPhoto } from "../services/upload.services";
 export const useUploadPhoto = () => {
   return useMutation({
     mutationFn: uploadPhoto,
+    onError: err => console.log(err)
   });
 };

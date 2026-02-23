@@ -1,6 +1,7 @@
-import React from "react";
+
 import { CheckCircle2, AlertCircle, Users, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export default function TrustReasons({
   snapshot,
@@ -13,12 +14,12 @@ export default function TrustReasons({
   const confirmedCount = snapshot?.confirmedCount || 0;
   const disputeCount = snapshot?.unresolvedDisputesCount || 0;
   const uniqueClients = snapshot?.uniqueConfirmersCount || 0;
-
+    const t = useTranslations('DashboardPage');
   const reasons = [
     {
       icon: Shield,
       positive: isVerified,
-      text: isVerified ? "Identity verified" : "Verify your identity",
+      text: isVerified ? t('verifiedIdentity') : t('verifyIdentity'),
       color: isVerified ? "text-emerald-600" : "text-amber-600",
       bg: isVerified ? "bg-emerald-50" : "bg-amber-50",
     },
@@ -27,7 +28,7 @@ export default function TrustReasons({
       positive: confirmedCount >= 5,
       text:
         confirmedCount > 0
-          ? `${confirmedCount} confirmed events`
+          ? `${confirmedCount} ${t('confirmedEventsSummary')}`
           : "Get more confirmations",
       color: confirmedCount >= 5 ? "text-emerald-600" : "text-amber-600",
       bg: confirmedCount >= 5 ? "bg-emerald-50" : "bg-amber-50",
@@ -37,8 +38,8 @@ export default function TrustReasons({
       positive: disputeCount === 0,
       text:
         disputeCount === 0
-          ? "No unresolved disputes"
-          : `${disputeCount} unresolved disputes`,
+          ? t('noUnresolvedDisputes')
+          : `${disputeCount} ${t('openDisputesCount')}`,
       color: disputeCount === 0 ? "text-emerald-600" : "text-red-600",
       bg: disputeCount === 0 ? "bg-emerald-50" : "bg-red-50",
     },
@@ -47,8 +48,8 @@ export default function TrustReasons({
       positive: uniqueClients >= 10,
       text:
         uniqueClients > 0
-          ? `${uniqueClients} unique clients`
-          : "Work with more clients",
+          ? `${uniqueClients} ${t('uniqueClients')}`
+          : t('workWithMoreClients'),
       color: uniqueClients >= 10 ? "text-emerald-600" : "text-amber-600",
       bg: uniqueClients >= 10 ? "bg-emerald-50" : "bg-amber-50",
     },

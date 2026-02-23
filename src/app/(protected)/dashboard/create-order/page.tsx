@@ -151,20 +151,28 @@ export default function CreateOrder() {
 
     if (result.success) {
       const formData = new FormData();
-      formData.append("invoiceFiles", invoice as File);
-      formData.append("profOfDeliveryFiles", proofFile as File);
 
-      const data = await uploadPhoto.mutateAsync({
+      if(invoice){
+        formData.append("invoiceFiles", invoice);
+      }
+     
+      if(proofFile){
+        formData.append("profOfDeliveryFiles", proofFile);
+      }
+
+      if(proofFile || invoice){
+
+        const data = await uploadPhoto.mutateAsync({
         path: `user/upload-assets?orderId=${result?.data?.order?.id}`,
         file: formData,
       });
+      console.log(data)
+      }
 
-      if (data) {
-        setIsModalOpen(true);
-        setShareableLink(
+      setIsModalOpen(true);
+      setShareableLink(
           `http://localhost:300/shared-links/${result.data.link.link}`,
         );
-      }
     }
   };
 
@@ -328,7 +336,6 @@ export default function CreateOrder() {
                   type="file"
                   accept="image/*"
                   onChange={handleInvoiceChange}
-                  required
                   className="file:border file:bg-emerald-600 file:text-white px-0 file:cursor-pointer cursor-pointer file:px-4 file:py-2 h-10 py-0  file:rounded-md"
                 />
               </div>

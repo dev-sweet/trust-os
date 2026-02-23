@@ -25,7 +25,6 @@ import {
 import {
   Globe,
   LogOut,
-  Search,
   ChevronDown,
   User,
   Building2,
@@ -33,7 +32,6 @@ import {
   PanelRightOpen,
 } from "lucide-react";
 import { Button } from "@radix-ui/themes";
-// import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
 import { useCheckUser, useLogoutUser } from "@/hooks/useUserMutations";
@@ -49,39 +47,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useActiveAccount } from "@/store/accoutStore";
+import { useLocale, useTranslations } from "next-intl";
 
-// menu items
-const menuItem = [
-  { icon: <FiHome />, label: "Home", href: "/dashboard" },
-  {
-    icon: <MdTaskAlt />,
-    label: "Action Center",
-    href: "/dashboard/action-center",
-  },
-  {
-    icon: <VscWorkspaceTrusted />,
-    label: "Trust Center",
-    href: "/dashboard/trust-center",
-  },
-  {
-    icon: <MdEventNote />,
-    label: "Work Ledger",
-    href: "/dashboard/work-ledger",
-  },
-  { icon: <FiMessageSquare />, label: "Disputes", href: "/dashboard/disputes" },
-  { icon: <FiInbox />, label: "Inbox", href: "/dashboard/inbox" },
-  { icon: <RiShareLine />, label: "Share", href: "/dashboard/share" },
-  {
-    icon: <MdSupportAgent />,
-    label: "Support Tickets",
-    href: "/dashboard/support",
-  },
-  {
-    icon: <MdOutlineSettings />,
-    label: "Settings",
-    href: "/dashboard/user-settings",
-  },
-];
+
+
 
 export default function DashboardLayout({
   children,
@@ -95,12 +64,17 @@ export default function DashboardLayout({
   const [profileOpen, setProfileOpen] = useState<boolean>(false);
   const profileRef = useRef<HTMLDivElement | null>(null);
 
+  // mutations
   const { data, isLoading } = useCheckUser();
-  const { mutate, isPending } = useLogoutUser();
+  const { mutate } = useLogoutUser();
 
   const pathname = usePathname();
   const router = useRouter();
 
+  // language translations
+  const locale = useLocale();
+  const t = useTranslations('DasboardMenu');
+ 
   // zustand
   const { user, businesses, setUser, setBusinesses } = useAuthStore();
   const switchToBusiness = useActiveAccount((state) => state.switchToBusiness);
@@ -111,9 +85,52 @@ export default function DashboardLayout({
     (business) => business.id === activeAccount.id,
   );
 
+  // menu items
+const menuItem = [
+  { icon: <FiHome />, label: t('home'), href: "/dashboard" },
+  {
+    icon: <MdTaskAlt />,
+    label: t('actionCenter'),
+    href: "/dashboard/action-center",
+  },
+  {
+    icon: <VscWorkspaceTrusted />,
+    label: t('trustCenter'),
+    href: "/dashboard/trust-center",
+  },
+  {
+    icon: <MdEventNote />,
+    label: t('workLedger'),
+    href: "/dashboard/work-ledger",
+  },
+  { icon: <FiMessageSquare />, label: t('disputes'), href: "/dashboard/disputes" },
+  { icon: <FiInbox />, label: t('inbox'), href: "/dashboard/inbox" },
+  { icon: <RiShareLine />, label: t('share'), href: "/dashboard/share" },
+  {
+    icon: <MdSupportAgent />,
+    label: t('supportTickets'),
+    href: "/dashboard/support",
+  },
+  {
+    icon: <MdOutlineSettings />,
+    label: t('settings'),
+    href: "/dashboard/user-settings",
+  },
+];
+  // handle language switching
+  const handleSwitchLang = async() =>{
+    console.log(locale)
+   const newLocale = locale === 'en' ? 'bn' : 'en';
+   document.cookie = `locale=${newLocale}; path=/`;
+   router.refresh();
+  }
+  
+  // log out
   const handleLogout = () => {
     mutate();
   };
+
+
   /* Close profile dropdown on outside click */
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -128,6 +145,9 @@ export default function DashboardLayout({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+
+
+// Set user and businesses data on load
   useEffect(() => {
     if (data?.loggedIn) {
       setUser(data.user);
@@ -170,6 +190,7 @@ export default function DashboardLayout({
               )}
             </button>
           </div>
+         
           {/* User */}
           <div className="px-4">
             <DropdownMenu>
@@ -321,7 +342,8 @@ export default function DashboardLayout({
                   : "opacity-100 translate-x-0"
               }`}
             >
-              {isPending ? "Logging Out..." : "Logout"}
+              {t('logout')}
+              {/* {isPending ? "Logging Out..." : "Logout"} */}
             </span>
           </Button>
         </div>
@@ -329,12 +351,12 @@ export default function DashboardLayout({
 
       <div
         className={cn(
-          "flex-1 flex flex-col fix top-0 left-0 right-0",
+          "flex-1 flex flex-col",
           collapsed ? "lg:pl-17.5" : "lg:pl-65",
         )}
       >
         {/* ================= HEADER ================= */}
-        <header className="right-0 flex items-center justify-between px-4 py-3 bg-gray-100 border-b border-gray-500/30">
+        <header className="flex items-center justify-between px-4 py-3 border-b border-gray-500/20">
           <div className="flex items-center gap-3 flex-1">
             <button
               onClick={() => setMobileOpen(true)}
@@ -357,10 +379,10 @@ export default function DashboardLayout({
             <Button
               variant="ghost"
               // size="sm"
-              // onClick={() => setLang(lang === 'BN' ? 'EN' : 'BN')}
-              className="flex items-center justify-between"
+              onClick={handleSwitchLang}
+              className="flex items-center justify-between cursor-pointer hover:bg-gray-100"
             >
-              <Globe className="h-5 w-5" /> EN
+              <Globe className="h-5 w-5 me-1" /> {locale === 'en' ? 'EN' : 'বাংলা'}
             </Button>
 
             <button className="border border-gray-200/60 rounded-full p-2">
